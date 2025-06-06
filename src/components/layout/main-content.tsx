@@ -6,15 +6,9 @@ import { SpacesPage } from '@/components/pages/spaces-page'
 import { RecordingPage } from '@/components/pages/recording-page'
 import { AnalysisPage } from '@/components/pages/analysis-page'
 import { SettingsPage } from '@/components/pages/settings-page'
-import { SampleAnalysisPage } from '@/components/pages/sample-analysis-page'
 
 export function MainContent() {
-  const { currentPage, navigationState } = useNavigation()
-
-  // Show sample analysis page when a sample is selected
-  if (currentPage === 'analysis' && navigationState.selectedSampleId) {
-    return <SampleAnalysisPage />
-  }
+  const { currentPage } = useNavigation()
 
   switch (currentPage) {
     case 'home':

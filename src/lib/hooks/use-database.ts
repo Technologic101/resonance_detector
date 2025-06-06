@@ -11,9 +11,14 @@ export function useSpaces() {
     try {
       setLoading(true)
       setError(null)
+      
+      // Ensure database is initialized
+      await database.init()
+      
       const allSpaces = await database.getAllSpaces()
       setSpaces(allSpaces.reverse()) // Most recent first
     } catch (err) {
+      console.error('Error loading spaces:', err)
       setError(err instanceof Error ? err.message : 'Failed to load spaces')
     } finally {
       setLoading(false)
@@ -47,9 +52,14 @@ export function useSpace(id: string | null) {
     try {
       setLoading(true)
       setError(null)
+      
+      // Ensure database is initialized
+      await database.init()
+      
       const foundSpace = await database.getSpace(id)
       setSpace(foundSpace || null)
     } catch (err) {
+      console.error('Error loading space:', err)
       setError(err instanceof Error ? err.message : 'Failed to load space')
     } finally {
       setLoading(false)
@@ -77,11 +87,16 @@ export function useSamples(spaceId?: string) {
     try {
       setLoading(true)
       setError(null)
+      
+      // Ensure database is initialized
+      await database.init()
+      
       const allSamples = spaceId 
         ? await database.getSamplesForSpace(spaceId)
         : await database.getAllSamples()
       setSamples(allSamples.reverse()) // Most recent first
     } catch (err) {
+      console.error('Error loading samples:', err)
       setError(err instanceof Error ? err.message : 'Failed to load samples')
     } finally {
       setLoading(false)
@@ -112,13 +127,25 @@ export function useStats() {
     try {
       setLoading(true)
       setError(null)
+      
+      // Ensure database is initialized before getting stats
+      await database.init()
+      
+      // Add a small delay to ensure database is fully ready
+      // This helps with first load issues
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
       const [spaceCount, sampleCount] = await Promise.all([
         database.getSpaceCount(),
         database.getSampleCount(),
       ])
+      
       setStats({ spaceCount, sampleCount })
     } catch (err) {
+      console.error('Error loading stats:', err)
       setError(err instanceof Error ? err.message : 'Failed to load stats')
+      // Set default values on error
+      setStats({ spaceCount: 0, sampleCount: 0 })
     } finally {
       setLoading(false)
     }
@@ -145,10 +172,21 @@ export function useRecentSamples(limit: number = 5) {
     try {
       setLoading(true)
       setError(null)
+      
+      // Ensure database is initialized
+      await database.init()
+      
+      // Add a small delay to ensure database is fully ready
+      // This helps with first load issues
+      await new Promise(resolve => setTimeout(resolve, 100))
+      
       const recentSamples = await database.getRecentSamples(limit)
       setSamples(recentSamples)
     } catch (err) {
+      console.error('Error loading recent samples:', err)
       setError(err instanceof Error ? err.message : 'Failed to load recent samples')
+      // Set empty array on error
+      setSamples([])
     } finally {
       setLoading(false)
     }

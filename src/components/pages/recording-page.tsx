@@ -6,7 +6,7 @@ import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { WaveformVisualizer } from '@/components/ui/waveform-visualizer'
 import { LevelMeter } from '@/components/ui/level-meter'
 import { RecordingControls } from '@/components/ui/recording-controls'
-import { Mic, ArrowLeft, AlertCircle, CheckCircle, Clock, Building2 } from 'lucide-react'
+import { Mic, ArrowLeft, AlertCircle, CheckCircle, Clock, Building2, Activity, Zap } from 'lucide-react'
 import { useNavigation } from '@/lib/context/navigation-context'
 import { useAudioRecorder } from '@/lib/hooks/use-audio-recorder'
 import { useSpaces } from '@/lib/hooks/use-database'
@@ -33,6 +33,7 @@ export function RecordingPage() {
     resumeRecording,
     stopRecording,
     saveRecording,
+    getAudioNodes,
     canRecord,
     canPause,
     canResume,
@@ -43,8 +44,14 @@ export function RecordingPage() {
       channelCount: 1,
       maxDuration: 300, // 5 minutes
       minDuration: 1, // 1 second
+      enableEchoCancellation: false,
+      enableNoiseSuppression: false,
+      enableAutoGainControl: false,
     },
   })
+
+  // Get audio nodes for visualization
+  const { audioContext, analyserNode } = getAudioNodes()
 
   // Auto-select first space if none selected
   useEffect(() => {
@@ -205,7 +212,7 @@ export function RecordingPage() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6 max-w-4xl">
+      <main className="container mx-auto px-4 py-6 max-w-6xl">
         {/* Success Message */}
         {saveSuccess && (
           <div className="mb-6 p-4 bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
@@ -233,7 +240,7 @@ export function RecordingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Left Column - Controls */}
           <div className="space-y-6">
-            {/* Space Selection */}
+            {/* Recording Settings */}
             <div className="bg-card border rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4">Recording Settings</h3>
               
@@ -314,6 +321,13 @@ export function RecordingPage() {
                         {analysis.frequency.toFixed(1)} Hz
                       </span>
                     </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">SNR</span>
+                      <span className="font-mono">
+                        {analysis.frequencyAnalysis.snr.toFixed(1)} dB
+                      </span>
+                    </div>
                   </>
                 )}
               </div>
@@ -365,20 +379,23 @@ export function RecordingPage() {
             <WaveformVisualizer
               level={recordingState.level}
               isRecording={recordingState.isRecording}
+              audioContext={audioContext}
+              analyserNode={analyserNode}
             />
 
             {/* Level Meter */}
             <LevelMeter
               level={recordingState.level}
               peak={analysis?.peak || 0}
+              rms={analysis?.rms || 0}
             />
 
-            {/* Analysis Display */}
+            {/* Real-time Analysis */}
             {analysis && (
               <div className="bg-card border rounded-lg p-6">
                 <h3 className="text-lg font-semibold mb-4">Real-time Analysis</h3>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4 mb-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-primary">
                       {(analysis.rms * 100).toFixed(1)}%
@@ -393,11 +410,44 @@ export function RecordingPage() {
                     <div className="text-sm text-muted-foreground">Peak Level</div>
                   </div>
                   
-                  <div className="text-center col-span-2">
+                  <div className="text-center">
                     <div className="text-xl font-bold text-primary">
                       {analysis.frequency.toFixed(1)} Hz
                     </div>
-                    <div className="text-sm text-muted-foreground">Dominant Frequency</div>
+                    <div className="text-sm text-muted-foreground">Dominant Freq</div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="text-xl font-bold text-primary">
+                      {analysis.frequencyAnalysis.peaks.length}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Peaks Found</div>
+                  </div>
+                </div>
+
+                {/* Advanced Metrics */}
+                <div className="border-t pt-4">
+                  <h4 className="font-medium mb-3 flex items-center">
+                    <Activity className="h-4 w-4 mr-2" />
+                    Advanced Metrics
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Spectral Centroid:</span>
+                      <span className="font-mono">{analysis.metrics.spectralCentroid.toFixed(0)} Hz</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Zero Crossings:</span>
+                      <span className="font-mono">{(analysis.metrics.zeroCrossingRate * 100).toFixed(1)}%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">THD:</span>
+                      <span className="font-mono">{analysis.frequencyAnalysis.thd.toFixed(2)}%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Fundamental:</span>
+                      <span className="font-mono">{analysis.frequencyAnalysis.fundamentalFrequency.toFixed(1)} Hz</span>
+                    </div>
                   </div>
                 </div>
               </div>

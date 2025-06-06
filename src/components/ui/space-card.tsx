@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { MoreVertical, Edit, Trash2, Mic } from 'lucide-react'
+import { MoreVertical, Edit, Trash2, Mic, Eye } from 'lucide-react'
 import { Space } from '@/lib/types'
 import { database } from '@/lib/database'
 import { useNavigation } from '@/lib/context/navigation-context'
@@ -14,7 +14,7 @@ interface SpaceCardProps {
 }
 
 export function SpaceCard({ space, onUpdate }: SpaceCardProps) {
-  const { navigateToRecording } = useNavigation()
+  const { navigateToRecording, navigateToSpace } = useNavigation()
   const [showMenu, setShowMenu] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -49,12 +49,26 @@ export function SpaceCard({ space, onUpdate }: SpaceCardProps) {
     navigateToRecording(space.id)
   }
 
+  const handleViewSpace = () => {
+    navigateToSpace(space.id)
+  }
+
+  const handleTitleClick = () => {
+    navigateToSpace(space.id)
+  }
+
   return (
     <div className="bg-card rounded-lg border p-6 hover:shadow-md transition-shadow relative">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <h3 className="font-semibold text-lg mb-1">{space.name}</h3>
+          <button
+            onClick={handleTitleClick}
+            className="text-left hover:text-primary transition-colors"
+            disabled={isDeleting}
+          >
+            <h3 className="font-semibold text-lg mb-1 hover:underline">{space.name}</h3>
+          </button>
           <p className="text-sm text-primary font-medium">{getSpaceTypeLabel(space.type)}</p>
         </div>
         <div className="relative">
@@ -118,26 +132,24 @@ export function SpaceCard({ space, onUpdate }: SpaceCardProps) {
       </div>
 
       {/* Actions */}
-      <div className="flex gap-2">
+      <div className="grid grid-cols-2 gap-2">
         <Button
           variant="outline"
           size="sm"
           onClick={handleRecord}
-          className="flex-1"
           disabled={isDeleting}
         >
           <Mic className="h-4 w-4 mr-2" />
           Record
         </Button>
         <Button
-          variant="ghost"
+          variant="outline"
           size="sm"
-          onClick={() => {
-            // TODO: Navigate to space details
-          }}
+          onClick={handleViewSpace}
           disabled={isDeleting}
         >
-          View Details
+          <Eye className="h-4 w-4 mr-2" />
+          View
         </Button>
       </div>
 

@@ -6,11 +6,23 @@ import { Waves, Mic, BarChart3, Settings, Plus, Building2 } from 'lucide-react'
 import { useNavigation } from '@/lib/context/navigation-context'
 import { useStats, useRecentSamples } from '@/lib/hooks/use-database'
 import { formatDateTime, getSoundTypeLabel, getSignalQualityBgColor } from '@/lib/utils/space-utils'
+import { useEffect } from 'react'
 
 export function HomePage() {
   const { navigateToRecording, navigateToCreateSpace, setCurrentPage } = useNavigation()
-  const { stats, loading: statsLoading } = useStats()
-  const { samples: recentSamples, loading: samplesLoading } = useRecentSamples(3)
+  const { stats, loading: statsLoading, error: statsError, refetch: refetchStats } = useStats()
+  const { samples: recentSamples, loading: samplesLoading, error: samplesError, refetch: refetchSamples } = useRecentSamples(3)
+
+  // Ensure stats are loaded correctly on first render
+  useEffect(() => {
+    // Refetch stats after a short delay to ensure database is ready
+    const timer = setTimeout(() => {
+      refetchStats()
+      refetchSamples()
+    }, 500)
+    
+    return () => clearTimeout(timer)
+  }, [refetchStats, refetchSamples])
 
   const handleNewRecording = () => {
     navigateToRecording()
@@ -22,6 +34,12 @@ export function HomePage() {
 
   const handleNewSpace = () => {
     navigateToCreateSpace()
+  }
+
+  // Retry loading stats if there was an error
+  const handleRetryStats = () => {
+    refetchStats()
+    refetchSamples()
   }
 
   return (
@@ -63,7 +81,19 @@ export function HomePage() {
               </div>
               <div className="text-right">
                 <div className="text-2xl font-bold text-primary">
-                  {statsLoading ? '...' : stats.spaceCount}
+                  {statsLoading ? (
+                    <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-8 w-8 rounded"></div>
+                  ) : statsError ? (
+                    <button 
+                      onClick={handleRetryStats}
+                      className="text-red-600 hover:text-red-700 text-sm"
+                      title="Click to retry"
+                    >
+                      Error
+                    </button>
+                  ) : (
+                    stats.spaceCount
+                  )}
                 </div>
                 <div className="text-sm text-muted-foreground">Spaces</div>
               </div>
@@ -76,7 +106,19 @@ export function HomePage() {
               </div>
               <div className="text-right">
                 <div className="text-2xl font-bold text-secondary-foreground">
-                  {statsLoading ? '...' : stats.sampleCount}
+                  {statsLoading ? (
+                    <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-8 w-8 rounded"></div>
+                  ) : statsError ? (
+                    <button 
+                      onClick={handleRetryStats}
+                      className="text-red-600 hover:text-red-700 text-sm"
+                      title="Click to retry"
+                    >
+                      Error
+                    </button>
+                  ) : (
+                    stats.sampleCount
+                  )}
                 </div>
                 <div className="text-sm text-muted-foreground">Samples</div>
               </div>
@@ -102,6 +144,13 @@ export function HomePage() {
           {samplesLoading ? (
             <div className="bg-card rounded-lg border p-8 text-center">
               <div className="animate-pulse">Loading recent activity...</div>
+            </div>
+          ) : samplesError ? (
+            <div className="bg-card rounded-lg border p-8 text-center">
+              <div className="text-red-600 mb-4">Failed to load recent activity</div>
+              <Button variant="outline" onClick={handleRetryStats}>
+                Retry
+              </Button>
             </div>
           ) : recentSamples.length === 0 ? (
             <div className="bg-card rounded-lg border p-8 text-center">

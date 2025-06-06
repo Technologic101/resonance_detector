@@ -8,6 +8,7 @@ import { useSpaces } from '@/lib/hooks/use-database'
 import { useNavigation } from '@/lib/context/navigation-context'
 import { CreateSpaceForm } from '@/components/forms/create-space-form'
 import { SpaceCard } from '@/components/ui/space-card'
+import { SpaceDetailsView } from '@/components/ui/space-details-view'
 
 export function SpacesPage() {
   const { spaces, loading, refetch } = useSpaces()
@@ -20,9 +21,17 @@ export function SpacesPage() {
   )
 
   const showCreateForm = navigationState.mode === 'create'
+  const showSpaceDetails = navigationState.mode === 'view' && navigationState.selectedSpaceId
+  const selectedSpace = showSpaceDetails 
+    ? spaces.find(space => space.id === navigationState.selectedSpaceId)
+    : null
 
   if (showCreateForm) {
     return <CreateSpaceForm onSuccess={refetch} />
+  }
+
+  if (showSpaceDetails && selectedSpace) {
+    return <SpaceDetailsView space={selectedSpace} onUpdate={refetch} />
   }
 
   return (

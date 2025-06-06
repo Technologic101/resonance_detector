@@ -125,16 +125,19 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
       
       const analysisData = analysis ? {
         ambientNoise: analysis.rms * 100,
-        peaks: [{
-          id: crypto.randomUUID(),
-          frequency: analysis.frequency,
-          amplitude: analysis.peak * 100,
-          prominence: analysis.rms / analysis.peak,
-        }],
+        peaks: analysis.frequencyAnalysis.peaks,
         spectralData: {
           rms: analysis.rms,
           peak: analysis.peak,
           dominantFrequency: analysis.frequency,
+          spectralCentroid: analysis.metrics.spectralCentroid,
+          spectralRolloff: analysis.metrics.spectralRolloff,
+          zeroCrossingRate: analysis.metrics.zeroCrossingRate,
+          mfcc: analysis.metrics.mfcc,
+          snr: analysis.frequencyAnalysis.snr,
+          thd: analysis.frequencyAnalysis.thd,
+          fundamentalFrequency: analysis.frequencyAnalysis.fundamentalFrequency,
+          harmonics: analysis.frequencyAnalysis.harmonics,
         },
       } : undefined
 
@@ -157,6 +160,16 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
   // Get storage info
   const getStorageInfo = useCallback(async () => {
     return await AudioStorage.getStorageUsage()
+  }, [])
+
+  // Get audio context and analyser for visualizations
+  const getAudioNodes = useCallback(() => {
+    if (!recorderRef.current) return { audioContext: null, analyserNode: null }
+    
+    const audioContext = recorderRef.current.getAudioContext()
+    const analyserNode = recorderRef.current['processor']?.getAnalyser() || null
+    
+    return { audioContext, analyserNode }
   }, [])
 
   // Cleanup
@@ -200,6 +213,7 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
     stopRecording,
     saveRecording,
     getStorageInfo,
+    getAudioNodes,
     cleanup,
     
     // Computed

@@ -28,42 +28,88 @@ class DatabaseManager {
   private db: IDBPDatabase<ResonanceDB> | null = null
   private readonly DB_NAME = 'resonance-detector'
   private readonly DB_VERSION = 1
+  private initPromise: Promise<void> | null = null
+  private isInitialized = false
 
   async init(): Promise<void> {
-    if (this.db) return
+    // Return existing initialization promise if already in progress
+    if (this.initPromise) {
+      return this.initPromise
+    }
 
-    this.db = await openDB<ResonanceDB>(this.DB_NAME, this.DB_VERSION, {
-      upgrade(db) {
-        // Create spaces store
-        const spacesStore = db.createObjectStore('spaces', {
-          keyPath: 'id',
-        })
-        spacesStore.createIndex('by-type', 'type')
-        spacesStore.createIndex('by-updated', 'updatedAt')
-        spacesStore.createIndex('by-created', 'createdAt')
+    // Return immediately if already initialized
+    if (this.db && this.isInitialized) {
+      return Promise.resolve()
+    }
 
-        // Create samples store
-        const samplesStore = db.createObjectStore('samples', {
-          keyPath: 'id',
-        })
-        samplesStore.createIndex('by-space', 'spaceId')
-        samplesStore.createIndex('by-recorded', 'recordedAt')
-        samplesStore.createIndex('by-quality', 'signalQuality')
-        samplesStore.createIndex('by-type', 'soundType')
-      },
-    })
+    // Create new initialization promise
+    this.initPromise = this.performInit()
+    
+    try {
+      await this.initPromise
+      this.isInitialized = true
+    } finally {
+      this.initPromise = null
+    }
   }
 
-  private ensureDB(): IDBPDatabase<ResonanceDB> {
-    if (!this.db) {
-      throw new Error('Database not initialized. Call init() first.')
+  private async performInit(): Promise<void> {
+    try {
+      this.db = await openDB<ResonanceDB>(this.DB_NAME, this.DB_VERSION, {
+        upgrade(db, oldVersion, newVersion, transaction) {
+          console.log(`Upgrading database from version ${oldVersion} to ${newVersion}`)
+          
+          // Create spaces store
+          if (!db.objectStoreNames.contains('spaces')) {
+            const spacesStore = db.createObjectStore('spaces', {
+              keyPath: 'id',
+            })
+            spacesStore.createIndex('by-type', 'type')
+            spacesStore.createIndex('by-updated', 'updatedAt')
+            spacesStore.createIndex('by-created', 'createdAt')
+          }
+
+          // Create samples store
+          if (!db.objectStoreNames.contains('samples')) {
+            const samplesStore = db.createObjectStore('samples', {
+              keyPath: 'id',
+            })
+            samplesStore.createIndex('by-space', 'spaceId')
+            samplesStore.createIndex('by-recorded', 'recordedAt')
+            samplesStore.createIndex('by-quality', 'signalQuality')
+            samplesStore.createIndex('by-type', 'soundType')
+          }
+        },
+        blocked() {
+          console.warn('Database upgrade blocked by another tab')
+        },
+        blocking() {
+          console.warn('Database upgrade blocking another tab')
+        },
+      })
+      
+      console.log('Database initialized successfully')
+    } catch (error) {
+      console.error('Failed to initialize database:', error)
+      this.db = null
+      this.isInitialized = false
+      throw error
     }
+  }
+
+  private async ensureDB(): Promise<IDBPDatabase<ResonanceDB>> {
+    await this.init()
+    
+    if (!this.db) {
+      throw new Error('Database not initialized')
+    }
+    
     return this.db
   }
 
   // Space operations
   async createSpace(data: CreateSpaceData): Promise<Space> {
-    const db = this.ensureDB()
+    const db = await this.ensureDB()
     const now = new Date()
     
     const space: Space = {
@@ -84,17 +130,23 @@ class DatabaseManager {
   }
 
   async getSpace(id: string): Promise<Space | undefined> {
-    const db = this.ensureDB()
+    const db = await this.ensureDB()
     return await db.get('spaces', id)
   }
 
   async getAllSpaces(): Promise<Space[]> {
-    const db = this.ensureDB()
-    return await db.getAllFromIndex('spaces', 'by-updated')
+    const db = await this.ensureDB()
+    try {
+      return await db.getAllFromIndex('spaces', 'by-updated')
+    } catch (error) {
+      console.error('Error getting all spaces:', error)
+      // Fallback to getAll if index fails
+      return await db.getAll('spaces')
+    }
   }
 
   async updateSpace(id: string, updates: Partial<Space>): Promise<Space> {
-    const db = this.ensureDB()
+    const db = await this.ensureDB()
     const existing = await db.get('spaces', id)
     
     if (!existing) {
@@ -113,7 +165,7 @@ class DatabaseManager {
   }
 
   async deleteSpace(id: string): Promise<void> {
-    const db = this.ensureDB()
+    const db = await this.ensureDB()
     
     try {
       // Start a transaction that includes both stores
@@ -144,13 +196,18 @@ class DatabaseManager {
   }
 
   async getSpaceCount(): Promise<number> {
-    const db = this.ensureDB()
-    return await db.count('spaces')
+    const db = await this.ensureDB()
+    try {
+      return await db.count('spaces')
+    } catch (error) {
+      console.error('Error getting space count:', error)
+      return 0
+    }
   }
 
   // Sample operations
   async createSample(data: CreateSampleData): Promise<Sample> {
-    const db = this.ensureDB()
+    const db = await this.ensureDB()
     const now = new Date()
     
     const sample: Sample = {
@@ -182,28 +239,50 @@ class DatabaseManager {
   }
 
   async getSample(id: string): Promise<Sample | undefined> {
-    const db = this.ensureDB()
+    const db = await this.ensureDB()
     return await db.get('samples', id)
   }
 
   async getSamplesForSpace(spaceId: string): Promise<Sample[]> {
-    const db = this.ensureDB()
-    return await db.getAllFromIndex('samples', 'by-space', spaceId)
+    const db = await this.ensureDB()
+    try {
+      return await db.getAllFromIndex('samples', 'by-space', spaceId)
+    } catch (error) {
+      console.error('Error getting samples for space:', error)
+      // Fallback to filtering all samples
+      const allSamples = await db.getAll('samples')
+      return allSamples.filter(sample => sample.spaceId === spaceId)
+    }
   }
 
   async getAllSamples(): Promise<Sample[]> {
-    const db = this.ensureDB()
-    return await db.getAllFromIndex('samples', 'by-recorded')
+    const db = await this.ensureDB()
+    try {
+      return await db.getAllFromIndex('samples', 'by-recorded')
+    } catch (error) {
+      console.error('Error getting all samples:', error)
+      // Fallback to getAll if index fails
+      return await db.getAll('samples')
+    }
   }
 
   async getRecentSamples(limit: number = 5): Promise<Sample[]> {
-    const db = this.ensureDB()
-    const allSamples = await db.getAllFromIndex('samples', 'by-recorded')
-    return allSamples.slice(-limit).reverse()
+    const db = await this.ensureDB()
+    try {
+      const allSamples = await db.getAllFromIndex('samples', 'by-recorded')
+      return allSamples.slice(-limit).reverse()
+    } catch (error) {
+      console.error('Error getting recent samples:', error)
+      // Fallback to getAll and manual sorting
+      const allSamples = await db.getAll('samples')
+      return allSamples
+        .sort((a, b) => b.recordedAt.getTime() - a.recordedAt.getTime())
+        .slice(0, limit)
+    }
   }
 
   async updateSample(id: string, updates: Partial<Sample>): Promise<Sample> {
-    const db = this.ensureDB()
+    const db = await this.ensureDB()
     const existing = await db.get('samples', id)
     
     if (!existing) {
@@ -221,7 +300,7 @@ class DatabaseManager {
   }
 
   async deleteSample(id: string): Promise<void> {
-    const db = this.ensureDB()
+    const db = await this.ensureDB()
     const sample = await db.get('samples', id)
     
     if (sample) {
@@ -238,13 +317,18 @@ class DatabaseManager {
   }
 
   async getSampleCount(): Promise<number> {
-    const db = this.ensureDB()
-    return await db.count('samples')
+    const db = await this.ensureDB()
+    try {
+      return await db.count('samples')
+    } catch (error) {
+      console.error('Error getting sample count:', error)
+      return 0
+    }
   }
 
   // Utility methods
   async clearAllData(): Promise<void> {
-    const db = this.ensureDB()
+    const db = await this.ensureDB()
     await db.clear('spaces')
     await db.clear('samples')
   }
@@ -256,7 +340,7 @@ class DatabaseManager {
   }
 
   async importData(data: { spaces: Space[]; samples: Sample[] }): Promise<void> {
-    const db = this.ensureDB()
+    const db = await this.ensureDB()
     
     // Clear existing data
     await this.clearAllData()
@@ -276,7 +360,9 @@ class DatabaseManager {
 // Singleton instance
 export const database = new DatabaseManager()
 
-// Initialize database on module load
+// Initialize database on module load (browser only)
 if (typeof window !== 'undefined') {
-  database.init().catch(console.error)
+  database.init().catch(error => {
+    console.error('Failed to initialize database on module load:', error)
+  })
 }
