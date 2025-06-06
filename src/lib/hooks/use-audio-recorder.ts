@@ -26,20 +26,29 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
   // Initialize recorder
   const initialize = useCallback(async () => {
     try {
+      console.log('Initializing audio recorder...')
+      
       if (recorderRef.current) {
         recorderRef.current.dispose()
       }
 
       const recorder = new AudioRecorder(
         config,
-        setRecordingState,
-        setAnalysis
+        (state) => {
+          console.log('Recording state changed:', state)
+          setRecordingState(state)
+        },
+        (analysisData) => {
+          console.log('Analysis updated:', analysisData)
+          setAnalysis(analysisData)
+        }
       )
 
       await recorder.initialize()
       recorderRef.current = recorder
       setIsInitialized(true)
       setIsPermissionGranted(true)
+      console.log('Audio recorder initialized successfully')
     } catch (error) {
       console.error('Failed to initialize audio recorder:', error)
       setRecordingState(prev => ({
@@ -53,32 +62,40 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
   // Check microphone permission
   const checkPermission = useCallback(async () => {
     try {
-      const result = await navigator.permissions.query({ name: 'microphone' as PermissionName })
-      setIsPermissionGranted(result.state === 'granted')
+      console.log('Checking microphone permission...')
       
-      result.addEventListener('change', () => {
-        setIsPermissionGranted(result.state === 'granted')
+      // Try to get user media directly as permission API is unreliable
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        audio: {
+          sampleRate: 48000,
+          channelCount: 1,
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false,
+        }
       })
+      
+      // Stop the stream immediately as we're just checking permission
+      stream.getTracks().forEach(track => track.stop())
+      setIsPermissionGranted(true)
+      console.log('Microphone permission granted')
     } catch (error) {
-      // Fallback: try to access microphone directly
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-        stream.getTracks().forEach(track => track.stop())
-        setIsPermissionGranted(true)
-      } catch {
-        setIsPermissionGranted(false)
-      }
+      console.error('Microphone permission denied:', error)
+      setIsPermissionGranted(false)
     }
   }, [])
 
   // Start recording
   const startRecording = useCallback(async () => {
+    console.log('Starting recording...')
+    
     if (!recorderRef.current) {
       throw new Error('Recorder not initialized')
     }
 
     try {
       await recorderRef.current.startRecording()
+      console.log('Recording started successfully')
     } catch (error) {
       console.error('Failed to start recording:', error)
       throw error
@@ -87,24 +104,49 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
 
   // Pause recording
   const pauseRecording = useCallback(() => {
-    if (!recorderRef.current) return
-    recorderRef.current.pauseRecording()
+    console.log('Pausing recording...')
+    
+    if (!recorderRef.current) {
+      console.warn('No recorder available to pause')
+      return
+    }
+    
+    try {
+      recorderRef.current.pauseRecording()
+      console.log('Recording paused')
+    } catch (error) {
+      console.error('Failed to pause recording:', error)
+    }
   }, [])
 
   // Resume recording
   const resumeRecording = useCallback(() => {
-    if (!recorderRef.current) return
-    recorderRef.current.resumeRecording()
+    console.log('Resuming recording...')
+    
+    if (!recorderRef.current) {
+      console.warn('No recorder available to resume')
+      return
+    }
+    
+    try {
+      recorderRef.current.resumeRecording()
+      console.log('Recording resumed')
+    } catch (error) {
+      console.error('Failed to resume recording:', error)
+    }
   }, [])
 
   // Stop recording
   const stopRecording = useCallback(async () => {
+    console.log('Stopping recording...')
+    
     if (!recorderRef.current) {
       throw new Error('Recorder not initialized')
     }
 
     try {
       const blob = await recorderRef.current.stopRecording()
+      console.log('Recording stopped, blob size:', blob.size)
       return blob
     } catch (error) {
       console.error('Failed to stop recording:', error)
@@ -120,6 +162,13 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
     signalQuality?: SignalQuality
   ) => {
     try {
+      console.log('Saving recording...', { 
+        blobSize: blob.size, 
+        spaceId, 
+        soundType, 
+        duration: recordingState.duration 
+      })
+      
       const duration = recordingState.duration
       const quality = signalQuality || (analysis?.signalQuality as SignalQuality) || SignalQuality.GOOD
       
@@ -150,6 +199,7 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
         analysisData
       )
 
+      console.log('Recording saved with ID:', sampleId)
       return sampleId
     } catch (error) {
       console.error('Failed to save recording:', error)
@@ -174,11 +224,21 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
 
   // Cleanup
   const cleanup = useCallback(() => {
+    console.log('Cleaning up audio recorder...')
+    
     if (recorderRef.current) {
       recorderRef.current.dispose()
       recorderRef.current = null
     }
     setIsInitialized(false)
+    setAnalysis(null)
+    setRecordingState({
+      isRecording: false,
+      isPaused: false,
+      duration: 0,
+      level: 0,
+      error: null,
+    })
   }, [])
 
   // Initialize on mount
@@ -217,7 +277,7 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
     cleanup,
     
     // Computed
-    canRecord: isInitialized && isPermissionGranted && !recordingState.isRecording,
+    canRecord: isInitialized && isPermissionGranted && !recordingState.isRecording && !recordingState.isPaused,
     canPause: isInitialized && recordingState.isRecording && !recordingState.isPaused,
     canResume: isInitialized && recordingState.isPaused,
     canStop: isInitialized && (recordingState.isRecording || recordingState.isPaused),

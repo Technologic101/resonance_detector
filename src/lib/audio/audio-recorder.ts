@@ -68,6 +68,8 @@ export class AudioRecorder {
 
   async initialize(): Promise<void> {
     try {
+      console.log('AudioRecorder: Starting initialization...')
+      
       // Request microphone access with specific constraints
       this.stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -79,14 +81,19 @@ export class AudioRecorder {
         },
       })
 
+      console.log('AudioRecorder: Got media stream')
+
       // Create audio context with specified sample rate
       this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({
         sampleRate: this.config.sampleRate,
       })
 
+      console.log('AudioRecorder: Created audio context, state:', this.audioContext.state)
+
       // Resume audio context if suspended
       if (this.audioContext.state === 'suspended') {
         await this.audioContext.resume()
+        console.log('AudioRecorder: Resumed audio context')
       }
 
       // Create audio processor and analyzer
@@ -103,8 +110,12 @@ export class AudioRecorder {
       this.microphone = this.audioContext.createMediaStreamSource(this.stream)
       this.microphone.connect(this.processor.getAnalyser())
 
+      console.log('AudioRecorder: Connected audio processing chain')
+
       // Create media recorder with optimal settings
       const mimeType = this.getSupportedMimeType()
+      console.log('AudioRecorder: Using MIME type:', mimeType)
+      
       this.mediaRecorder = new MediaRecorder(this.stream, {
         mimeType,
         audioBitsPerSecond: this.config.sampleRate * this.config.channelCount * this.config.bitDepth,
@@ -119,7 +130,10 @@ export class AudioRecorder {
         level: 0,
         error: null,
       })
+
+      console.log('AudioRecorder: Initialization complete')
     } catch (error) {
+      console.error('AudioRecorder: Initialization failed:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to initialize audio'
       this.updateState({
         isRecording: false,
@@ -145,10 +159,12 @@ export class AudioRecorder {
     
     for (const type of types) {
       if (MediaRecorder.isTypeSupported(type)) {
+        console.log('AudioRecorder: Found supported MIME type:', type)
         return type
       }
     }
     
+    console.warn('AudioRecorder: No supported MIME type found, using default')
     return ''
   }
 
@@ -156,21 +172,25 @@ export class AudioRecorder {
     if (!this.mediaRecorder) return
 
     this.mediaRecorder.ondataavailable = (event) => {
+      console.log('AudioRecorder: Data available, size:', event.data.size)
       if (event.data.size > 0) {
         this.chunks.push(event.data)
       }
     }
 
     this.mediaRecorder.onstop = () => {
+      console.log('AudioRecorder: MediaRecorder stopped')
       this.stopAnalysis()
     }
 
     this.mediaRecorder.onpause = () => {
+      console.log('AudioRecorder: MediaRecorder paused')
       this.lastPauseTime = Date.now()
       this.stopAnalysis()
     }
 
     this.mediaRecorder.onresume = () => {
+      console.log('AudioRecorder: MediaRecorder resumed')
       if (this.lastPauseTime > 0) {
         this.pausedDuration += Date.now() - this.lastPauseTime
         this.lastPauseTime = 0
@@ -178,7 +198,12 @@ export class AudioRecorder {
       this.startAnalysis()
     }
 
+    this.mediaRecorder.onstart = () => {
+      console.log('AudioRecorder: MediaRecorder started')
+    }
+
     this.mediaRecorder.onerror = (event) => {
+      console.error('AudioRecorder: MediaRecorder error:', event)
       this.updateState({
         isRecording: false,
         isPaused: false,
@@ -198,6 +223,8 @@ export class AudioRecorder {
       await this.audioContext?.resume()
     }
 
+    console.log('AudioRecorder: Starting recording...')
+
     this.chunks = []
     this.startTime = Date.now()
     this.pausedDuration = 0
@@ -214,13 +241,17 @@ export class AudioRecorder {
       level: 0,
       error: null,
     })
+
+    console.log('AudioRecorder: Recording started')
   }
 
   pauseRecording(): void {
     if (!this.mediaRecorder || this.mediaRecorder.state !== 'recording') {
+      console.warn('AudioRecorder: Cannot pause - not recording')
       return
     }
 
+    console.log('AudioRecorder: Pausing recording...')
     this.mediaRecorder.pause()
     
     this.updateState({
@@ -234,9 +265,11 @@ export class AudioRecorder {
 
   resumeRecording(): void {
     if (!this.mediaRecorder || this.mediaRecorder.state !== 'paused') {
+      console.warn('AudioRecorder: Cannot resume - not paused')
       return
     }
 
+    console.log('AudioRecorder: Resuming recording...')
     this.mediaRecorder.resume()
     
     this.updateState({
@@ -262,10 +295,14 @@ export class AudioRecorder {
         return
       }
 
+      console.log('AudioRecorder: Stopping recording, duration:', duration)
+
       this.mediaRecorder.onstop = () => {
         const mimeType = this.getSupportedMimeType()
         const blob = new Blob(this.chunks, { type: mimeType })
         this.chunks = []
+        
+        console.log('AudioRecorder: Created blob, size:', blob.size)
         
         this.updateState({
           isRecording: false,
@@ -283,7 +320,12 @@ export class AudioRecorder {
   }
 
   private startAnalysis(): void {
-    if (!this.processor || !this.analyzer || !this.audioContext) return
+    if (!this.processor || !this.analyzer || !this.audioContext) {
+      console.warn('AudioRecorder: Cannot start analysis - missing components')
+      return
+    }
+
+    console.log('AudioRecorder: Starting analysis loop')
 
     const analyze = () => {
       if (!this.processor || !this.analyzer || !this.audioContext) return
@@ -327,13 +369,14 @@ export class AudioRecorder {
         
         // Check max duration
         if (this.getCurrentDuration() >= this.config.maxDuration) {
+          console.log('AudioRecorder: Max duration reached, stopping')
           this.stopRecording().catch(console.error)
           return
         }
         
         this.animationFrame = requestAnimationFrame(analyze)
       } catch (error) {
-        console.error('Analysis error:', error)
+        console.error('AudioRecorder: Analysis error:', error)
         this.animationFrame = requestAnimationFrame(analyze)
       }
     }
@@ -343,6 +386,7 @@ export class AudioRecorder {
 
   private stopAnalysis(): void {
     if (this.animationFrame) {
+      console.log('AudioRecorder: Stopping analysis loop')
       cancelAnimationFrame(this.animationFrame)
       this.animationFrame = 0
     }
@@ -422,6 +466,8 @@ export class AudioRecorder {
   }
 
   dispose(): void {
+    console.log('AudioRecorder: Disposing...')
+    
     this.stopAnalysis()
     
     if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
