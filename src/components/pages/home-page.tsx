@@ -5,6 +5,21 @@ import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { Waves, Mic, BarChart3, Settings, Plus } from 'lucide-react'
 
 export function HomePage() {
+  const handleNewRecording = () => {
+    // TODO: Navigate to recording page
+    alert('Recording feature will be implemented in the next phase')
+  }
+
+  const handleViewAnalysis = () => {
+    // TODO: Navigate to analysis page
+    alert('Analysis feature will be implemented in the next phase')
+  }
+
+  const handleNewSpace = () => {
+    // TODO: Navigate to create space page
+    alert('Space creation feature will be implemented in the next phase')
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -77,7 +92,10 @@ export function HomePage() {
         <div>
           <h3 className="text-xl font-semibold mb-4">Quick Actions</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-card rounded-lg border p-6 hover:bg-accent/50 transition-colors cursor-pointer">
+            <button
+              onClick={handleNewRecording}
+              className="bg-card rounded-lg border p-6 hover:bg-accent/50 transition-colors cursor-pointer text-left w-full"
+            >
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-primary/10 rounded-lg">
                   <Mic className="h-6 w-6 text-primary" />
@@ -87,8 +105,11 @@ export function HomePage() {
                   <p className="text-sm text-muted-foreground">Start measuring resonance</p>
                 </div>
               </div>
-            </div>
-            <div className="bg-card rounded-lg border p-6 hover:bg-accent/50 transition-colors cursor-pointer">
+            </button>
+            <button
+              onClick={handleViewAnalysis}
+              className="bg-card rounded-lg border p-6 hover:bg-accent/50 transition-colors cursor-pointer text-left w-full"
+            >
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-primary/10 rounded-lg">
                   <BarChart3 className="h-6 w-6 text-primary" />
@@ -98,14 +119,14 @@ export function HomePage() {
                   <p className="text-sm text-muted-foreground">Review frequency data</p>
                 </div>
               </div>
-            </div>
+            </button>
           </div>
         </div>
       </main>
 
       {/* Floating Action Button */}
       <div className="fixed bottom-20 right-6">
-        <Button size="lg" className="rounded-full shadow-lg">
+        <Button size="lg" className="rounded-full shadow-lg" onClick={handleNewSpace}>
           <Plus className="h-5 w-5 mr-2" />
           New Space
         </Button>
