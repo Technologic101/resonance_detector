@@ -46,14 +46,10 @@ export function getSoundTypeLabel(type: SoundType): string {
   switch (type) {
     case SoundType.SINE_WAVE_SWEEP:
       return 'Sine Wave Sweep'
-    case SoundType.IMPULSE_RESPONSE:
-      return 'Impulse Response'
     case SoundType.PINK_NOISE:
       return 'Pink Noise'
     case SoundType.CHIRP_SIGNAL:
       return 'Chirp Signal'
-    case SoundType.MLS:
-      return 'MLS'
     case SoundType.HAND_CLAP:
       return 'Hand Clap'
     case SoundType.AMBIENT:
@@ -67,14 +63,10 @@ export function getSoundTypeIcon(type: SoundType): string {
   switch (type) {
     case SoundType.SINE_WAVE_SWEEP:
       return 'trending-up'
-    case SoundType.IMPULSE_RESPONSE:
-      return 'zap'
     case SoundType.PINK_NOISE:
       return 'radio'
     case SoundType.CHIRP_SIGNAL:
       return 'activity'
-    case SoundType.MLS:
-      return 'function-square'
     case SoundType.HAND_CLAP:
       return 'hand'
     case SoundType.AMBIENT:

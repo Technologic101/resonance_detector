@@ -1,5 +1,6 @@
 import { AudioProcessor, AudioMetrics } from './audio-processor'
 import { FrequencyAnalyzer, FrequencyAnalysisResult } from './frequency-analyzer'
+import { SoundType } from '@/lib/types'
 
 export interface AudioRecorderConfig {
   sampleRate?: number
@@ -41,7 +42,7 @@ export class AudioRecorder {
   private lastPauseTime: number = 0
   private animationFrame: number = 0
   private stream: MediaStream | null = null
-  private testToneOscillator: OscillatorNode | null = null
+  private testToneSource: AudioBufferSourceNode | OscillatorNode | null = null
   private testToneGain: GainNode | null = null
   
   private config: Required<AudioRecorderConfig>
@@ -200,7 +201,6 @@ export class AudioRecorder {
         this.lastPauseTime = 0
       }
       this.startAnalysis()
-      this.playTestTone()
     }
 
     this.mediaRecorder.onstart = () => {
@@ -219,45 +219,191 @@ export class AudioRecorder {
     }
   }
 
-  private async playTestTone(): Promise<void> {
+  private async _playSelectedSoundEffect(soundType: SoundType): Promise<void> {
     if (!this.audioContext) return
 
     try {
       // Stop any existing test tone
       this.stopTestTone()
 
-      // Create a brief test tone (1kHz sine wave for 0.5 seconds)
-      this.testToneOscillator = this.audioContext.createOscillator()
+      // Create gain node for volume control
       this.testToneGain = this.audioContext.createGain()
-
-      this.testToneOscillator.frequency.setValueAtTime(1000, this.audioContext.currentTime)
-      this.testToneOscillator.type = 'sine'
-
-      // Set volume to be audible but not too loud
-      this.testToneGain.gain.setValueAtTime(0, this.audioContext.currentTime)
-      this.testToneGain.gain.linearRampToValueAtTime(0.1, this.audioContext.currentTime + 0.05)
-      this.testToneGain.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.5)
-
-      this.testToneOscillator.connect(this.testToneGain)
       this.testToneGain.connect(this.audioContext.destination)
 
-      this.testToneOscillator.start(this.audioContext.currentTime)
-      this.testToneOscillator.stop(this.audioContext.currentTime + 0.5)
+      // Set initial volume
+      this.testToneGain.gain.setValueAtTime(0, this.audioContext.currentTime)
 
-      console.log('AudioRecorder: Playing test tone')
+      switch (soundType) {
+        case SoundType.SINE_WAVE_SWEEP:
+          await this._playSineWaveSweep()
+          break
+        case SoundType.PINK_NOISE:
+          await this._playPinkNoise()
+          break
+        case SoundType.CHIRP_SIGNAL:
+          await this._playChirpSignal()
+          break
+        case SoundType.HAND_CLAP:
+          await this._playHandClap()
+          break
+        case SoundType.AMBIENT:
+        default:
+          await this._playAmbientTone()
+          break
+      }
+
+      console.log(`AudioRecorder: Playing ${soundType} sound effect`)
     } catch (error) {
-      console.error('AudioRecorder: Failed to play test tone:', error)
+      console.error('AudioRecorder: Failed to play sound effect:', error)
     }
   }
 
+  private async _playSineWaveSweep(): Promise<void> {
+    if (!this.audioContext || !this.testToneGain) return
+
+    const oscillator = this.audioContext.createOscillator()
+    this.testToneSource = oscillator
+
+    oscillator.type = 'sine'
+    oscillator.frequency.setValueAtTime(100, this.audioContext.currentTime)
+    
+    // Sweep from 100Hz to 2000Hz over 2 seconds
+    oscillator.frequency.exponentialRampToValueAtTime(2000, this.audioContext.currentTime + 2)
+
+    oscillator.connect(this.testToneGain)
+
+    // Fade in and out
+    this.testToneGain.gain.linearRampToValueAtTime(0.1, this.audioContext.currentTime + 0.1)
+    this.testToneGain.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 2.1)
+
+    oscillator.start(this.audioContext.currentTime)
+    oscillator.stop(this.audioContext.currentTime + 2.1)
+  }
+
+  private async _playPinkNoise(): Promise<void> {
+    if (!this.audioContext || !this.testToneGain) return
+
+    // Create white noise and filter it to approximate pink noise
+    const bufferSize = this.audioContext.sampleRate * 2 // 2 seconds
+    const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate)
+    const data = buffer.getChannelData(0)
+
+    // Generate white noise
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1
+    }
+
+    const source = this.audioContext.createBufferSource()
+    this.testToneSource = source
+    source.buffer = buffer
+
+    // Create a simple low-pass filter to approximate pink noise
+    const filter = this.audioContext.createBiquadFilter()
+    filter.type = 'lowpass'
+    filter.frequency.setValueAtTime(1000, this.audioContext.currentTime)
+    filter.Q.setValueAtTime(0.5, this.audioContext.currentTime)
+
+    source.connect(filter)
+    filter.connect(this.testToneGain)
+
+    // Fade in and out
+    this.testToneGain.gain.linearRampToValueAtTime(0.05, this.audioContext.currentTime + 0.1)
+    this.testToneGain.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 1.9)
+
+    source.start(this.audioContext.currentTime)
+    source.stop(this.audioContext.currentTime + 2)
+  }
+
+  private async _playChirpSignal(): Promise<void> {
+    if (!this.audioContext || !this.testToneGain) return
+
+    const oscillator = this.audioContext.createOscillator()
+    this.testToneSource = oscillator
+
+    oscillator.type = 'sine'
+    oscillator.frequency.setValueAtTime(200, this.audioContext.currentTime)
+    
+    // Exponential chirp from 200Hz to 4000Hz over 1.5 seconds
+    oscillator.frequency.exponentialRampToValueAtTime(4000, this.audioContext.currentTime + 1.5)
+
+    oscillator.connect(this.testToneGain)
+
+    // Quick fade in and out
+    this.testToneGain.gain.linearRampToValueAtTime(0.08, this.audioContext.currentTime + 0.05)
+    this.testToneGain.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 1.55)
+
+    oscillator.start(this.audioContext.currentTime)
+    oscillator.stop(this.audioContext.currentTime + 1.6)
+  }
+
+  private async _playHandClap(): Promise<void> {
+    if (!this.audioContext || !this.testToneGain) return
+
+    // Simulate hand clap with short burst of filtered noise
+    const bufferSize = this.audioContext.sampleRate * 0.2 // 200ms
+    const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate)
+    const data = buffer.getChannelData(0)
+
+    // Generate noise with exponential decay
+    for (let i = 0; i < bufferSize; i++) {
+      const decay = Math.exp(-i / (bufferSize * 0.1))
+      data[i] = (Math.random() * 2 - 1) * decay
+    }
+
+    const source = this.audioContext.createBufferSource()
+    this.testToneSource = source
+    source.buffer = buffer
+
+    // High-pass filter to simulate hand clap frequency content
+    const filter = this.audioContext.createBiquadFilter()
+    filter.type = 'highpass'
+    filter.frequency.setValueAtTime(800, this.audioContext.currentTime)
+    filter.Q.setValueAtTime(2, this.audioContext.currentTime)
+
+    source.connect(filter)
+    filter.connect(this.testToneGain)
+
+    // Quick attack
+    this.testToneGain.gain.setValueAtTime(0.15, this.audioContext.currentTime)
+    this.testToneGain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 0.2)
+
+    source.start(this.audioContext.currentTime)
+    source.stop(this.audioContext.currentTime + 0.2)
+  }
+
+  private async _playAmbientTone(): Promise<void> {
+    if (!this.audioContext || !this.testToneGain) return
+
+    // Simple 1kHz tone for ambient recording
+    const oscillator = this.audioContext.createOscillator()
+    this.testToneSource = oscillator
+
+    oscillator.frequency.setValueAtTime(1000, this.audioContext.currentTime)
+    oscillator.type = 'sine'
+
+    oscillator.connect(this.testToneGain)
+
+    // Gentle fade in and out
+    this.testToneGain.gain.linearRampToValueAtTime(0.05, this.audioContext.currentTime + 0.1)
+    this.testToneGain.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.9)
+
+    oscillator.start(this.audioContext.currentTime)
+    oscillator.stop(this.audioContext.currentTime + 1)
+  }
+
   private stopTestTone(): void {
-    if (this.testToneOscillator) {
+    if (this.testToneSource) {
       try {
-        this.testToneOscillator.stop()
+        if ('stop' in this.testToneSource) {
+          this.testToneSource.stop()
+        }
+        if ('disconnect' in this.testToneSource) {
+          this.testToneSource.disconnect()
+        }
       } catch (error) {
-        // Oscillator might already be stopped
+        // Source might already be stopped
       }
-      this.testToneOscillator = null
+      this.testToneSource = null
     }
     if (this.testToneGain) {
       this.testToneGain.disconnect()
@@ -265,7 +411,7 @@ export class AudioRecorder {
     }
   }
 
-  async startRecording(): Promise<void> {
+  async startRecording(soundType: SoundType = SoundType.AMBIENT): Promise<void> {
     if (!this.mediaRecorder || this.mediaRecorder.state !== 'inactive') {
       throw new Error('Recorder not ready')
     }
@@ -285,8 +431,8 @@ export class AudioRecorder {
     this.mediaRecorder.start(100)
     this.startAnalysis()
     
-    // Play test tone when recording starts
-    await this.playTestTone()
+    // Play selected sound effect when recording starts
+    await this._playSelectedSoundEffect(soundType)
     
     this.updateState({
       isRecording: true,

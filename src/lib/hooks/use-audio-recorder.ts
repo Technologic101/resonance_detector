@@ -86,7 +86,7 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
   }, [])
 
   // Start recording
-  const startRecording = useCallback(async () => {
+  const startRecording = useCallback(async (soundType: SoundType = SoundType.AMBIENT) => {
     console.log('Starting recording...')
     
     if (!recorderRef.current) {
@@ -94,7 +94,7 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
     }
 
     try {
-      await recorderRef.current.startRecording()
+      await recorderRef.current.startRecording(soundType)
       console.log('Recording started successfully')
     } catch (error) {
       console.error('Failed to start recording:', error)

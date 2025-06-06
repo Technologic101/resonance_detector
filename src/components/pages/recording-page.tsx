@@ -67,7 +67,7 @@ export function RecordingPage() {
     }
 
     try {
-      await startRecording()
+      await startRecording(selectedSoundType)
       setRecordingBlob(null)
       setSaveSuccess(false)
     } catch (error) {
@@ -284,6 +284,9 @@ export function RecordingPage() {
                       </option>
                     ))}
                   </select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    The selected sound will play when recording starts
+                  </p>
                 </div>
               </div>
             </div>
