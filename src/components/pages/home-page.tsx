@@ -2,22 +2,26 @@
 
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { Waves, Mic, BarChart3, Settings, Plus } from 'lucide-react'
+import { Waves, Mic, BarChart3, Settings, Plus, Building2 } from 'lucide-react'
+import { useNavigation } from '@/lib/context/navigation-context'
+import { useStats, useRecentSamples } from '@/lib/hooks/use-database'
+import { formatDateTime, getSoundTypeLabel, getSignalQualityBgColor } from '@/lib/utils/space-utils'
 
 export function HomePage() {
+  const { navigateToRecording, navigateToCreateSpace, setCurrentPage } = useNavigation()
+  const { stats, loading: statsLoading } = useStats()
+  const { samples: recentSamples, loading: samplesLoading } = useRecentSamples(3)
+
   const handleNewRecording = () => {
-    // TODO: Navigate to recording page
-    alert('Recording feature will be implemented in the next phase')
+    navigateToRecording()
   }
 
   const handleViewAnalysis = () => {
-    // TODO: Navigate to analysis page
-    alert('Analysis feature will be implemented in the next phase')
+    setCurrentPage('analysis')
   }
 
   const handleNewSpace = () => {
-    // TODO: Navigate to create space page
-    alert('Space creation feature will be implemented in the next phase')
+    navigateToCreateSpace()
   }
 
   return (
@@ -55,10 +59,12 @@ export function HomePage() {
           <div className="bg-card rounded-lg border p-6">
             <div className="flex items-center justify-between">
               <div className="p-2 bg-primary/10 rounded-lg">
-                <BarChart3 className="h-6 w-6 text-primary" />
+                <Building2 className="h-6 w-6 text-primary" />
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold text-primary">0</div>
+                <div className="text-2xl font-bold text-primary">
+                  {statsLoading ? '...' : stats.spaceCount}
+                </div>
                 <div className="text-sm text-muted-foreground">Spaces</div>
               </div>
             </div>
@@ -69,7 +75,9 @@ export function HomePage() {
                 <Mic className="h-6 w-6 text-secondary-foreground" />
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold text-secondary-foreground">0</div>
+                <div className="text-2xl font-bold text-secondary-foreground">
+                  {statsLoading ? '...' : stats.sampleCount}
+                </div>
                 <div className="text-sm text-muted-foreground">Samples</div>
               </div>
             </div>
@@ -78,14 +86,60 @@ export function HomePage() {
 
         {/* Recent Activity */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4">Recent Activity</h3>
-          <div className="bg-card rounded-lg border p-8 text-center">
-            <Mic className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h4 className="text-lg font-medium mb-2">No recordings yet</h4>
-            <p className="text-muted-foreground mb-4">
-              Create a space and start recording to see activity here
-            </p>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-semibold">Recent Activity</h3>
+            {recentSamples.length > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setCurrentPage('analysis')}
+              >
+                View All
+              </Button>
+            )}
           </div>
+          
+          {samplesLoading ? (
+            <div className="bg-card rounded-lg border p-8 text-center">
+              <div className="animate-pulse">Loading recent activity...</div>
+            </div>
+          ) : recentSamples.length === 0 ? (
+            <div className="bg-card rounded-lg border p-8 text-center">
+              <Mic className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <h4 className="text-lg font-medium mb-2">No recordings yet</h4>
+              <p className="text-muted-foreground mb-4">
+                Create a space and start recording to see activity here
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {recentSamples.map((sample) => (
+                <div key={sample.id} className="bg-card rounded-lg border p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-primary/10 rounded-lg">
+                        <Mic className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <div className="font-medium">{getSoundTypeLabel(sample.soundType)}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {formatDateTime(sample.recordedAt)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-sm text-muted-foreground">
+                        {sample.duration.toFixed(1)}s
+                      </span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getSignalQualityBgColor(sample.signalQuality)}`}>
+                        {sample.signalQuality.toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Quick Actions */}
@@ -131,34 +185,6 @@ export function HomePage() {
           New Space
         </Button>
       </div>
-
-      {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-card border-t">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-around py-2">
-            <Button variant="ghost" size="sm" className="flex-col h-auto py-2">
-              <Waves className="h-5 w-5 mb-1" />
-              <span className="text-xs">Home</span>
-            </Button>
-            <Button variant="ghost" size="sm" className="flex-col h-auto py-2">
-              <BarChart3 className="h-5 w-5 mb-1" />
-              <span className="text-xs">Spaces</span>
-            </Button>
-            <Button variant="ghost" size="sm" className="flex-col h-auto py-2">
-              <Mic className="h-5 w-5 mb-1" />
-              <span className="text-xs">Record</span>
-            </Button>
-            <Button variant="ghost" size="sm" className="flex-col h-auto py-2">
-              <BarChart3 className="h-5 w-5 mb-1" />
-              <span className="text-xs">Analysis</span>
-            </Button>
-            <Button variant="ghost" size="sm" className="flex-col h-auto py-2">
-              <Settings className="h-5 w-5 mb-1" />
-              <span className="text-xs">Settings</span>
-            </Button>
-          </div>
-        </div>
-      </nav>
     </div>
   )
 }
