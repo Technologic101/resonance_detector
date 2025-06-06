@@ -115,14 +115,32 @@ class DatabaseManager {
   async deleteSpace(id: string): Promise<void> {
     const db = this.ensureDB()
     
-    // Delete all samples for this space first
-    const samples = await this.getSamplesForSpace(id)
-    for (const sample of samples) {
-      await db.delete('samples', sample.id)
+    try {
+      // Start a transaction that includes both stores
+      const tx = db.transaction(['spaces', 'samples'], 'readwrite')
+      const spacesStore = tx.objectStore('spaces')
+      const samplesStore = tx.objectStore('samples')
+      
+      // Get all samples for this space
+      const samplesIndex = samplesStore.index('by-space')
+      const samples = await samplesIndex.getAll(id)
+      
+      // Delete all samples for this space
+      for (const sample of samples) {
+        await samplesStore.delete(sample.id)
+      }
+      
+      // Delete the space
+      await spacesStore.delete(id)
+      
+      // Wait for transaction to complete
+      await tx.done
+      
+      console.log(`Successfully deleted space ${id} and ${samples.length} associated samples`)
+    } catch (error) {
+      console.error('Error deleting space:', error)
+      throw new Error(`Failed to delete space: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
-    
-    // Delete the space
-    await db.delete('spaces', id)
   }
 
   async getSpaceCount(): Promise<number> {
