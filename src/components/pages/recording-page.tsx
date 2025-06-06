@@ -78,11 +78,13 @@ export function RecordingPage() {
 
   const handleStopRecording = async () => {
     try {
+      console.log('Attempting to stop recording...')
       const blob = await stopRecording()
+      console.log('Recording stopped successfully, blob size:', blob.size)
       setRecordingBlob(blob)
     } catch (error) {
       console.error('Failed to stop recording:', error)
-      alert('Failed to stop recording.')
+      alert(`Failed to stop recording: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 

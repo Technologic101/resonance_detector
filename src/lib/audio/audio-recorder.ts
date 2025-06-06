@@ -41,6 +41,8 @@ export class AudioRecorder {
   private lastPauseTime: number = 0
   private animationFrame: number = 0
   private stream: MediaStream | null = null
+  private testToneOscillator: OscillatorNode | null = null
+  private testToneGain: GainNode | null = null
   
   private config: Required<AudioRecorderConfig>
   private onStateChange: (state: RecordingState) => void
@@ -181,12 +183,14 @@ export class AudioRecorder {
     this.mediaRecorder.onstop = () => {
       console.log('AudioRecorder: MediaRecorder stopped')
       this.stopAnalysis()
+      this.stopTestTone()
     }
 
     this.mediaRecorder.onpause = () => {
       console.log('AudioRecorder: MediaRecorder paused')
       this.lastPauseTime = Date.now()
       this.stopAnalysis()
+      this.stopTestTone()
     }
 
     this.mediaRecorder.onresume = () => {
@@ -196,6 +200,7 @@ export class AudioRecorder {
         this.lastPauseTime = 0
       }
       this.startAnalysis()
+      this.playTestTone()
     }
 
     this.mediaRecorder.onstart = () => {
@@ -211,6 +216,52 @@ export class AudioRecorder {
         level: 0,
         error: 'Recording error occurred',
       })
+    }
+  }
+
+  private async playTestTone(): Promise<void> {
+    if (!this.audioContext) return
+
+    try {
+      // Stop any existing test tone
+      this.stopTestTone()
+
+      // Create a brief test tone (1kHz sine wave for 0.5 seconds)
+      this.testToneOscillator = this.audioContext.createOscillator()
+      this.testToneGain = this.audioContext.createGain()
+
+      this.testToneOscillator.frequency.setValueAtTime(1000, this.audioContext.currentTime)
+      this.testToneOscillator.type = 'sine'
+
+      // Set volume to be audible but not too loud
+      this.testToneGain.gain.setValueAtTime(0, this.audioContext.currentTime)
+      this.testToneGain.gain.linearRampToValueAtTime(0.1, this.audioContext.currentTime + 0.05)
+      this.testToneGain.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + 0.5)
+
+      this.testToneOscillator.connect(this.testToneGain)
+      this.testToneGain.connect(this.audioContext.destination)
+
+      this.testToneOscillator.start(this.audioContext.currentTime)
+      this.testToneOscillator.stop(this.audioContext.currentTime + 0.5)
+
+      console.log('AudioRecorder: Playing test tone')
+    } catch (error) {
+      console.error('AudioRecorder: Failed to play test tone:', error)
+    }
+  }
+
+  private stopTestTone(): void {
+    if (this.testToneOscillator) {
+      try {
+        this.testToneOscillator.stop()
+      } catch (error) {
+        // Oscillator might already be stopped
+      }
+      this.testToneOscillator = null
+    }
+    if (this.testToneGain) {
+      this.testToneGain.disconnect()
+      this.testToneGain = null
     }
   }
 
@@ -233,6 +284,9 @@ export class AudioRecorder {
     // Start recording with time slice for better data handling
     this.mediaRecorder.start(100)
     this.startAnalysis()
+    
+    // Play test tone when recording starts
+    await this.playTestTone()
     
     this.updateState({
       isRecording: true,
@@ -288,6 +342,12 @@ export class AudioRecorder {
         return
       }
 
+      // Check if we can stop (must be recording or paused)
+      if (this.mediaRecorder.state === 'inactive') {
+        reject(new Error('Recording is not active'))
+        return
+      }
+
       const duration = this.getCurrentDuration()
       
       if (duration < this.config.minDuration) {
@@ -297,7 +357,14 @@ export class AudioRecorder {
 
       console.log('AudioRecorder: Stopping recording, duration:', duration)
 
+      // Set up the stop handler before stopping
+      const originalOnStop = this.mediaRecorder.onstop
       this.mediaRecorder.onstop = () => {
+        // Call original handler first
+        if (originalOnStop) {
+          originalOnStop.call(this.mediaRecorder, new Event('stop'))
+        }
+
         const mimeType = this.getSupportedMimeType()
         const blob = new Blob(this.chunks, { type: mimeType })
         this.chunks = []
@@ -315,7 +382,13 @@ export class AudioRecorder {
         resolve(blob)
       }
 
-      this.mediaRecorder.stop()
+      // Stop the recording
+      try {
+        this.mediaRecorder.stop()
+      } catch (error) {
+        console.error('AudioRecorder: Error stopping MediaRecorder:', error)
+        reject(error)
+      }
     })
   }
 
@@ -469,6 +542,7 @@ export class AudioRecorder {
     console.log('AudioRecorder: Disposing...')
     
     this.stopAnalysis()
+    this.stopTestTone()
     
     if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
       this.mediaRecorder.stop()
