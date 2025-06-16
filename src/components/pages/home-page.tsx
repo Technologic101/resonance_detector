@@ -55,7 +55,7 @@ export function HomePage() {
               <Waves className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Building Resonance
               </h1>
               <p className="text-sm text-muted-foreground">Acoustic Analysis Platform</p>
@@ -69,7 +69,7 @@ export function HomePage() {
       <main className="container mx-auto px-4 py-8 pb-24">
         {/* Welcome Heading - Centered on Background */}
         <div className="text-center mb-12">
-          <h2 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+          <h2 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Welcome to Resonance Detection
           </h2>
           <p className="text-muted-foreground text-xl">
