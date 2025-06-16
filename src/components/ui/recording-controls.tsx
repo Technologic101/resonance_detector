@@ -35,9 +35,9 @@ export function RecordingControls({
   disabled = false,
 }: RecordingControlsProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Main Control Buttons */}
-      <div className="flex items-center justify-center space-x-4">
+      <div className="flex items-center justify-center space-x-6">
         {/* Record/Resume Button */}
         {canRecord && (
           <div className="text-center">
@@ -45,11 +45,11 @@ export function RecordingControls({
               size="lg"
               onClick={onStart}
               disabled={disabled}
-              className="bg-red-600 hover:bg-red-700 text-white rounded-full w-16 h-16 shadow-lg"
+              className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-full w-20 h-20 shadow-2xl glow-pulse border-0 hover:scale-105 transition-all duration-300"
             >
-              <Mic className="h-6 w-6" />
+              <Mic className="h-8 w-8" />
             </Button>
-            <p className="text-sm text-muted-foreground mt-2">Start Recording</p>
+            <p className="text-sm text-muted-foreground mt-3 font-medium">Start Recording</p>
           </div>
         )}
         
@@ -59,11 +59,11 @@ export function RecordingControls({
               size="lg"
               onClick={onResume}
               disabled={disabled}
-              className="bg-green-600 hover:bg-green-700 text-white rounded-full w-16 h-16 shadow-lg"
+              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-full w-20 h-20 shadow-2xl glow border-0 hover:scale-105 transition-all duration-300"
             >
-              <Play className="h-6 w-6" />
+              <Play className="h-8 w-8" />
             </Button>
-            <p className="text-sm text-muted-foreground mt-2">Resume</p>
+            <p className="text-sm text-muted-foreground mt-3 font-medium">Resume</p>
           </div>
         )}
 
@@ -75,11 +75,11 @@ export function RecordingControls({
               variant="outline"
               onClick={onPause}
               disabled={disabled}
-              className="rounded-full w-12 h-12 border-2"
+              className="glass border-2 border-white/30 rounded-full w-16 h-16 hover:bg-white/10 hover:scale-105 transition-all duration-300"
             >
-              <Pause className="h-5 w-5" />
+              <Pause className="h-6 w-6" />
             </Button>
-            <p className="text-sm text-muted-foreground mt-2">Pause</p>
+            <p className="text-sm text-muted-foreground mt-3 font-medium">Pause</p>
           </div>
         )}
 
@@ -91,11 +91,11 @@ export function RecordingControls({
               variant="outline"
               onClick={onStop}
               disabled={disabled}
-              className="rounded-full w-12 h-12 border-2"
+              className="glass border-2 border-white/30 rounded-full w-16 h-16 hover:bg-white/10 hover:scale-105 transition-all duration-300"
             >
-              <Square className="h-5 w-5" />
+              <Square className="h-6 w-6" />
             </Button>
-            <p className="text-sm text-muted-foreground mt-2">Stop</p>
+            <p className="text-sm text-muted-foreground mt-3 font-medium">Stop</p>
           </div>
         )}
       </div>
@@ -107,27 +107,29 @@ export function RecordingControls({
             size="lg"
             onClick={onSave}
             disabled={disabled}
-            className="rounded-full w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+            className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white rounded-full w-18 h-18 shadow-2xl glow border-0 hover:scale-105 transition-all duration-300"
           >
-            <Save className="h-6 w-6" />
+            <Save className="h-8 w-8" />
           </Button>
-          <p className="text-sm text-muted-foreground mt-2">Save Recording</p>
+          <p className="text-sm text-muted-foreground mt-3 font-medium">Save Recording</p>
         </div>
       )}
 
       {/* Status Indicator */}
       <div className="text-center">
-        <div className="flex items-center justify-center space-x-2">
-          <div className={`w-3 h-3 rounded-full ${
-            isRecording ? 'bg-red-500 animate-pulse' : 
-            isPaused ? 'bg-yellow-500' : 
-            'bg-gray-300'
-          }`} />
-          <span className="text-sm font-medium">
-            {isRecording ? 'Recording...' : 
-             isPaused ? 'Paused' : 
-             'Ready'}
-          </span>
+        <div className="glass-card rounded-xl p-4 inline-block">
+          <div className="flex items-center justify-center space-x-3">
+            <div className={`w-4 h-4 rounded-full transition-all duration-300 ${
+              isRecording ? 'bg-red-500 animate-pulse glow' : 
+              isPaused ? 'bg-yellow-500 glow' : 
+              'bg-gray-400'
+            }`} />
+            <span className="text-lg font-semibold">
+              {isRecording ? 'Recording...' : 
+               isPaused ? 'Paused' : 
+               'Ready'}
+            </span>
+          </div>
         </div>
       </div>
     </div>

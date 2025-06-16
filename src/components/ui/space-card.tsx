@@ -58,7 +58,7 @@ export function SpaceCard({ space, onUpdate }: SpaceCardProps) {
   }
 
   return (
-    <div className="bg-card rounded-lg border p-6 hover:shadow-md transition-shadow relative">
+    <div className="glass-card rounded-2xl p-6 hover-lift soft-shadow transition-all duration-300 relative group">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
@@ -67,29 +67,33 @@ export function SpaceCard({ space, onUpdate }: SpaceCardProps) {
             className="text-left hover:text-primary transition-colors"
             disabled={isDeleting}
           >
-            <h3 className="font-semibold text-lg mb-1 hover:underline">{space.name}</h3>
+            <h3 className="font-bold text-xl mb-2 hover:underline bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              {space.name}
+            </h3>
           </button>
-          <p className="text-sm text-primary font-medium">{getSpaceTypeLabel(space.type)}</p>
+          <div className="inline-block px-3 py-1 rounded-full text-sm font-medium gradient-accent text-white">
+            {getSpaceTypeLabel(space.type)}
+          </div>
         </div>
         <div className="relative">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setShowMenu(!showMenu)}
-            className="h-8 w-8"
+            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white/10"
             disabled={isDeleting}
           >
             <MoreVertical className="h-4 w-4" />
           </Button>
           {showMenu && (
             <>
-              <div className="absolute right-0 top-8 bg-card border rounded-lg shadow-lg py-1 z-20 min-w-[120px]">
+              <div className="absolute right-0 top-8 glass-card border border-white/20 rounded-xl shadow-xl py-2 z-20 min-w-[140px]">
                 <button
                   onClick={() => {
                     setShowMenu(false)
                     // TODO: Navigate to edit
                   }}
-                  className="w-full px-3 py-2 text-left hover:bg-accent flex items-center gap-2 text-sm"
+                  className="w-full px-4 py-2 text-left hover:bg-white/10 flex items-center gap-3 text-sm transition-colors"
                 >
                   <Edit className="h-4 w-4" />
                   Edit
@@ -97,7 +101,7 @@ export function SpaceCard({ space, onUpdate }: SpaceCardProps) {
                 <button
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="w-full px-3 py-2 text-left hover:bg-accent flex items-center gap-2 text-red-600 text-sm"
+                  className="w-full px-4 py-2 text-left hover:bg-white/10 flex items-center gap-3 text-red-400 text-sm transition-colors"
                 >
                   <Trash2 className="h-4 w-4" />
                   {isDeleting ? 'Deleting...' : 'Delete'}
@@ -115,31 +119,34 @@ export function SpaceCard({ space, onUpdate }: SpaceCardProps) {
 
       {/* Description */}
       {space.description && (
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+        <p className="text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
           {space.description}
         </p>
       )}
 
       {/* Stats */}
-      <div className="flex items-center gap-4 mb-4 text-sm text-muted-foreground">
-        <div className="flex items-center gap-1">
-          <Mic className="h-4 w-4" />
-          <span>{space.sampleIds.length} samples</span>
+      <div className="flex items-center gap-6 mb-6 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <div className="icon-container p-1 rounded">
+            <Mic className="h-3 w-3 text-white" />
+          </div>
+          <span className="font-medium">{space.sampleIds.length} samples</span>
         </div>
-        <div>
+        <div className="font-medium">
           Created {formatDate(space.createdAt)}
         </div>
       </div>
 
       {/* Actions */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-3">
         <Button
           variant="outline"
           size="sm"
           onClick={handleRecord}
           disabled={isDeleting}
+          className="group/btn"
         >
-          <Mic className="h-4 w-4 mr-2" />
+          <Mic className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform" />
           Record
         </Button>
         <Button
@@ -147,15 +154,16 @@ export function SpaceCard({ space, onUpdate }: SpaceCardProps) {
           size="sm"
           onClick={handleViewSpace}
           disabled={isDeleting}
+          className="group/btn"
         >
-          <Eye className="h-4 w-4 mr-2" />
+          <Eye className="h-4 w-4 mr-2 group-hover/btn:scale-110 transition-transform" />
           View
         </Button>
       </div>
 
       {/* Deleting overlay */}
       {isDeleting && (
-        <div className="absolute inset-0 bg-background/80 rounded-lg flex items-center justify-center">
+        <div className="absolute inset-0 glass rounded-2xl flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
             <p className="text-sm text-muted-foreground">Deleting space...</p>

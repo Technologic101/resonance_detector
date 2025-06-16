@@ -43,13 +43,23 @@ export function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
+      {/* Animated background */}
+      <div className="fixed inset-0 animated-gradient opacity-5 -z-10" />
+      
       {/* Header */}
-      <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Waves className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold">Building Resonance</h1>
+      <header className="glass-card border-b border-white/10">
+        <div className="container mx-auto px-4 py-6 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="icon-container p-3 rounded-xl">
+              <Waves className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Building Resonance
+              </h1>
+              <p className="text-sm text-muted-foreground">Acoustic Analysis Platform</p>
+            </div>
           </div>
           <ThemeToggle />
         </div>
@@ -58,14 +68,16 @@ export function HomePage() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 pb-24">
         {/* Welcome Section */}
-        <div className="bg-card rounded-lg border p-6 mb-8">
-          <div className="flex items-center space-x-4">
-            <div className="p-3 bg-primary/10 rounded-lg">
-              <Waves className="h-8 w-8 text-primary" />
+        <div className="glass-card rounded-2xl p-8 mb-8 hover-lift soft-shadow">
+          <div className="flex items-center space-x-6">
+            <div className="icon-container p-4 rounded-2xl floating">
+              <Waves className="h-12 w-12 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl font-semibold mb-2">Welcome to Resonance Detection</h2>
-              <p className="text-muted-foreground">
+              <h2 className="text-3xl font-bold mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Welcome to Resonance Detection
+              </h2>
+              <p className="text-muted-foreground text-lg">
                 Analyze building acoustics and structural frequencies with precision
               </p>
             </div>
@@ -74,19 +86,19 @@ export function HomePage() {
 
         {/* Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-card rounded-lg border p-6">
+          <div className="glass-card rounded-2xl p-6 hover-lift soft-shadow">
             <div className="flex items-center justify-between">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Building2 className="h-6 w-6 text-primary" />
+              <div className="icon-container p-3 rounded-xl">
+                <Building2 className="h-8 w-8 text-white" />
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold text-primary">
+                <div className="text-3xl font-bold gradient-primary bg-clip-text text-transparent">
                   {statsLoading ? (
-                    <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-8 w-8 rounded"></div>
+                    <div className="animate-pulse bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 h-8 w-12 rounded"></div>
                   ) : statsError ? (
                     <button 
                       onClick={handleRetryStats}
-                      className="text-red-600 hover:text-red-700 text-sm"
+                      className="text-red-500 hover:text-red-600 text-sm transition-colors"
                       title="Click to retry"
                     >
                       Error
@@ -95,23 +107,24 @@ export function HomePage() {
                     stats.spaceCount
                   )}
                 </div>
-                <div className="text-sm text-muted-foreground">Spaces</div>
+                <div className="text-sm text-muted-foreground font-medium">Spaces</div>
               </div>
             </div>
           </div>
-          <div className="bg-card rounded-lg border p-6">
+          
+          <div className="glass-card rounded-2xl p-6 hover-lift soft-shadow">
             <div className="flex items-center justify-between">
-              <div className="p-2 bg-secondary/10 rounded-lg">
-                <Mic className="h-6 w-6 text-secondary-foreground" />
+              <div className="icon-container p-3 rounded-xl">
+                <Mic className="h-8 w-8 text-white" />
               </div>
               <div className="text-right">
-                <div className="text-2xl font-bold text-secondary-foreground">
+                <div className="text-3xl font-bold gradient-accent bg-clip-text text-transparent">
                   {statsLoading ? (
-                    <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-8 w-8 rounded"></div>
+                    <div className="animate-pulse bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 h-8 w-12 rounded"></div>
                   ) : statsError ? (
                     <button 
                       onClick={handleRetryStats}
-                      className="text-red-600 hover:text-red-700 text-sm"
+                      className="text-red-500 hover:text-red-600 text-sm transition-colors"
                       title="Click to retry"
                     >
                       Error
@@ -120,7 +133,7 @@ export function HomePage() {
                     stats.sampleCount
                   )}
                 </div>
-                <div className="text-sm text-muted-foreground">Samples</div>
+                <div className="text-sm text-muted-foreground font-medium">Samples</div>
               </div>
             </div>
           </div>
@@ -128,13 +141,16 @@ export function HomePage() {
 
         {/* Recent Activity */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold">Recent Activity</h3>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400 bg-clip-text text-transparent">
+              Recent Activity
+            </h3>
             {recentSamples.length > 0 && (
               <Button 
                 variant="ghost" 
                 size="sm"
                 onClick={() => setCurrentPage('analysis')}
+                className="hover:bg-white/10 transition-all duration-300"
               >
                 View All
               </Button>
@@ -142,45 +158,47 @@ export function HomePage() {
           </div>
           
           {samplesLoading ? (
-            <div className="bg-card rounded-lg border p-8 text-center">
-              <div className="animate-pulse">Loading recent activity...</div>
+            <div className="glass-card rounded-2xl p-8 text-center soft-shadow">
+              <div className="animate-pulse text-muted-foreground">Loading recent activity...</div>
             </div>
           ) : samplesError ? (
-            <div className="bg-card rounded-lg border p-8 text-center">
-              <div className="text-red-600 mb-4">Failed to load recent activity</div>
-              <Button variant="outline" onClick={handleRetryStats}>
+            <div className="glass-card rounded-2xl p-8 text-center soft-shadow">
+              <div className="text-red-500 mb-4">Failed to load recent activity</div>
+              <Button variant="outline" onClick={handleRetryStats} className="glass border-white/20">
                 Retry
               </Button>
             </div>
           ) : recentSamples.length === 0 ? (
-            <div className="bg-card rounded-lg border p-8 text-center">
-              <Mic className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h4 className="text-lg font-medium mb-2">No recordings yet</h4>
+            <div className="glass-card rounded-2xl p-8 text-center soft-shadow">
+              <div className="icon-container p-4 rounded-2xl mx-auto mb-4 w-fit">
+                <Mic className="h-12 w-12 text-white" />
+              </div>
+              <h4 className="text-lg font-semibold mb-2">No recordings yet</h4>
               <p className="text-muted-foreground mb-4">
                 Create a space and start recording to see activity here
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {recentSamples.map((sample) => (
-                <div key={sample.id} className="bg-card rounded-lg border p-4">
+                <div key={sample.id} className="glass-card rounded-xl p-4 hover-lift soft-shadow">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <Mic className="h-4 w-4 text-primary" />
+                    <div className="flex items-center space-x-4">
+                      <div className="icon-container p-2 rounded-lg">
+                        <Mic className="h-5 w-5 text-white" />
                       </div>
                       <div>
-                        <div className="font-medium">{getSoundTypeLabel(sample.soundType)}</div>
+                        <div className="font-semibold">{getSoundTypeLabel(sample.soundType)}</div>
                         <div className="text-sm text-muted-foreground">
                           {formatDateTime(sample.recordedAt)}
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-muted-foreground">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-sm text-muted-foreground font-medium">
                         {sample.duration.toFixed(1)}s
                       </span>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getSignalQualityBgColor(sample.signalQuality)}`}>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getSignalQualityBgColor(sample.signalQuality)} border border-white/20`}>
                         {sample.signalQuality.toUpperCase()}
                       </span>
                     </div>
@@ -193,33 +211,36 @@ export function HomePage() {
 
         {/* Quick Actions */}
         <div>
-          <h3 className="text-xl font-semibold mb-4">Quick Actions</h3>
+          <h3 className="text-2xl font-bold mb-6 bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400 bg-clip-text text-transparent">
+            Quick Actions
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <button
               onClick={handleNewRecording}
-              className="bg-card rounded-lg border p-6 hover:bg-accent/50 transition-colors cursor-pointer text-left w-full"
+              className="glass-card rounded-2xl p-8 hover-lift soft-shadow transition-all duration-300 text-left w-full group"
             >
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-primary/10 rounded-lg">
-                  <Mic className="h-6 w-6 text-primary" />
+              <div className="flex items-center space-x-6">
+                <div className="icon-container p-4 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                  <Mic className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h4 className="font-medium">New Recording</h4>
-                  <p className="text-sm text-muted-foreground">Start measuring resonance</p>
+                  <h4 className="font-semibold text-lg mb-1">New Recording</h4>
+                  <p className="text-muted-foreground">Start measuring resonance</p>
                 </div>
               </div>
             </button>
+            
             <button
               onClick={handleViewAnalysis}
-              className="bg-card rounded-lg border p-6 hover:bg-accent/50 transition-colors cursor-pointer text-left w-full"
+              className="glass-card rounded-2xl p-8 hover-lift soft-shadow transition-all duration-300 text-left w-full group"
             >
-              <div className="flex items-center space-x-4">
-                <div className="p-3 bg-primary/10 rounded-lg">
-                  <BarChart3 className="h-6 w-6 text-primary" />
+              <div className="flex items-center space-x-6">
+                <div className="icon-container p-4 rounded-2xl group-hover:scale-110 transition-transform duration-300">
+                  <BarChart3 className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h4 className="font-medium">View Analysis</h4>
-                  <p className="text-sm text-muted-foreground">Review frequency data</p>
+                  <h4 className="font-semibold text-lg mb-1">View Analysis</h4>
+                  <p className="text-muted-foreground">Review frequency data</p>
                 </div>
               </div>
             </button>
@@ -228,8 +249,12 @@ export function HomePage() {
       </main>
 
       {/* Floating Action Button */}
-      <div className="fixed bottom-20 right-6">
-        <Button size="lg" className="rounded-full shadow-lg" onClick={handleNewSpace}>
+      <div className="fixed bottom-24 right-6">
+        <Button 
+          size="lg" 
+          className="rounded-full shadow-2xl glow-pulse gradient-primary border-0 text-white font-semibold px-6 py-3 hover:scale-105 transition-all duration-300" 
+          onClick={handleNewSpace}
+        >
           <Plus className="h-5 w-5 mr-2" />
           New Space
         </Button>

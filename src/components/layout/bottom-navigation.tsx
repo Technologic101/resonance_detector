@@ -36,9 +36,9 @@ export function BottomNavigation() {
   const { currentPage, setCurrentPage } = useNavigation()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-card border-t">
+    <nav className="fixed bottom-0 left-0 right-0 glass-card border-t border-white/10 backdrop-blur-xl">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-around py-2">
+        <div className="flex items-center justify-around py-3">
           {navigationItems.map((item) => {
             const Icon = item.icon
             const isActive = currentPage === item.id
@@ -48,13 +48,17 @@ export function BottomNavigation() {
                 key={item.id}
                 variant="ghost"
                 size="sm"
-                className={`flex-col h-auto py-2 ${
-                  isActive ? 'text-primary' : 'text-muted-foreground'
+                className={`flex-col h-auto py-3 px-4 transition-all duration-300 rounded-xl ${
+                  isActive 
+                    ? 'icon-container text-white scale-105' 
+                    : 'text-muted-foreground hover:text-white hover:bg-white/10'
                 }`}
                 onClick={() => setCurrentPage(item.id)}
               >
-                <Icon className={`h-5 w-5 mb-1 ${isActive ? 'text-primary' : ''}`} />
-                <span className="text-xs">{item.label}</span>
+                <Icon className={`h-5 w-5 mb-1 transition-all duration-300 ${
+                  isActive ? 'text-white scale-110' : ''
+                }`} />
+                <span className="text-xs font-medium">{item.label}</span>
               </Button>
             )
           })}

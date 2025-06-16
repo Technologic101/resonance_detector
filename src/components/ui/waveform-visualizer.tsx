@@ -40,23 +40,32 @@ export function WaveformVisualizer({
       const displayWidth = width / window.devicePixelRatio
       const displayHeight = height / window.devicePixelRatio
       
-      // Clear canvas
-      ctx.clearRect(0, 0, displayWidth, displayHeight)
+      // Clear canvas with gradient background
+      const gradient = ctx.createLinearGradient(0, 0, 0, displayHeight)
+      gradient.addColorStop(0, 'rgba(102, 126, 234, 0.1)')
+      gradient.addColorStop(1, 'rgba(118, 75, 162, 0.1)')
+      ctx.fillStyle = gradient
+      ctx.fillRect(0, 0, displayWidth, displayHeight)
       
       if (!isRecording) {
         // Draw static line when not recording
-        ctx.strokeStyle = '#e5e7eb'
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)'
         ctx.lineWidth = 2
+        ctx.setLineDash([5, 5])
         ctx.beginPath()
         ctx.moveTo(0, displayHeight / 2)
         ctx.lineTo(displayWidth, displayHeight / 2)
         ctx.stroke()
+        ctx.setLineDash([])
         
-        // Draw "Ready" text
-        ctx.fillStyle = '#9ca3af'
-        ctx.font = '14px Inter, sans-serif'
+        // Draw "Ready" text with glow
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'
+        ctx.font = 'bold 16px Inter, sans-serif'
         ctx.textAlign = 'center'
-        ctx.fillText('Ready to record', displayWidth / 2, displayHeight / 2 - 10)
+        ctx.shadowColor = 'rgba(102, 126, 234, 0.5)'
+        ctx.shadowBlur = 10
+        ctx.fillText('Ready to record', displayWidth / 2, displayHeight / 2 - 15)
+        ctx.shadowBlur = 0
         return
       }
 
@@ -92,10 +101,10 @@ export function WaveformVisualizer({
       dataRef.current.shift()
     }
 
-    // Draw background grid
-    ctx.strokeStyle = '#f3f4f6'
+    // Draw background grid with subtle glow
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)'
     ctx.lineWidth = 1
-    ctx.setLineDash([2, 2])
+    ctx.setLineDash([2, 4])
     
     // Horizontal grid lines
     for (let i = 0; i <= 4; i++) {
@@ -108,14 +117,17 @@ export function WaveformVisualizer({
     
     ctx.setLineDash([])
 
-    // Draw waveform
+    // Draw waveform with gradient and glow
     if (dataRef.current.length > 1) {
       const gradient = ctx.createLinearGradient(0, 0, width, 0)
-      gradient.addColorStop(0, '#3b82f6')
-      gradient.addColorStop(1, '#1d4ed8')
+      gradient.addColorStop(0, 'rgba(102, 126, 234, 0.8)')
+      gradient.addColorStop(0.5, 'rgba(240, 147, 251, 0.9)')
+      gradient.addColorStop(1, 'rgba(245, 87, 108, 0.8)')
       
       ctx.strokeStyle = gradient
-      ctx.lineWidth = 2
+      ctx.lineWidth = 3
+      ctx.shadowColor = 'rgba(102, 126, 234, 0.5)'
+      ctx.shadowBlur = 8
       ctx.beginPath()
 
       const stepX = width / Math.max(dataRef.current.length - 1, 1)
@@ -132,20 +144,27 @@ export function WaveformVisualizer({
       })
       
       ctx.stroke()
+      ctx.shadowBlur = 0
     }
 
-    // Draw current level indicator
+    // Draw current level indicator with glow
     const currentY = height / 2 + (currentLevel - 0.5) * height * 0.8
-    ctx.fillStyle = '#ef4444'
+    const indicatorGradient = ctx.createRadialGradient(width - 15, currentY, 0, width - 15, currentY, 8)
+    indicatorGradient.addColorStop(0, 'rgba(245, 87, 108, 1)')
+    indicatorGradient.addColorStop(1, 'rgba(245, 87, 108, 0.3)')
+    
+    ctx.fillStyle = indicatorGradient
     ctx.beginPath()
-    ctx.arc(width - 15, currentY, 4, 0, 2 * Math.PI)
+    ctx.arc(width - 15, currentY, 6, 0, 2 * Math.PI)
     ctx.fill()
 
-    // Draw level text
-    ctx.fillStyle = '#374151'
-    ctx.font = '12px Inter, sans-serif'
-    ctx.textAlign = 'right'
-    ctx.fillText(`${(currentLevel * 100).toFixed(0)}%`, width - 25, currentY - 10)
+    // Draw level text with background
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'
+    ctx.fillRect(width - 60, currentY - 20, 40, 16)
+    ctx.fillStyle = 'white'
+    ctx.font = 'bold 12px Inter, sans-serif'
+    ctx.textAlign = 'center'
+    ctx.fillText(`${(currentLevel * 100).toFixed(0)}%`, width - 40, currentY - 8)
   }
 
   const drawFrequencySpectrum = (
@@ -158,21 +177,17 @@ export function WaveformVisualizer({
     const dataArray = new Uint8Array(bufferLength)
     analyser.getByteFrequencyData(dataArray)
 
-    // Draw background
-    ctx.fillStyle = '#f9fafb'
-    ctx.fillRect(0, 0, width, height)
-
-    // Draw frequency bars
+    // Draw frequency bars with gradients
     const barWidth = width / bufferLength * 2
     let x = 0
 
-    const gradient = ctx.createLinearGradient(0, height, 0, 0)
-    gradient.addColorStop(0, '#3b82f6')
-    gradient.addColorStop(0.5, '#1d4ed8')
-    gradient.addColorStop(1, '#1e40af')
-
     for (let i = 0; i < bufferLength; i++) {
       const barHeight = (dataArray[i] / 255) * height * 0.8
+      
+      const gradient = ctx.createLinearGradient(0, height, 0, height - barHeight)
+      gradient.addColorStop(0, 'rgba(102, 126, 234, 0.8)')
+      gradient.addColorStop(0.5, 'rgba(240, 147, 251, 0.9)')
+      gradient.addColorStop(1, 'rgba(245, 87, 108, 1)')
       
       ctx.fillStyle = gradient
       ctx.fillRect(x, height - barHeight, barWidth, barHeight)
@@ -180,10 +195,12 @@ export function WaveformVisualizer({
       x += barWidth + 1
     }
 
-    // Draw frequency labels
-    ctx.fillStyle = '#6b7280'
-    ctx.font = '10px Inter, sans-serif'
+    // Draw frequency labels with glow
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'
+    ctx.font = 'bold 11px Inter, sans-serif'
     ctx.textAlign = 'center'
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)'
+    ctx.shadowBlur = 3
     
     const sampleRate = audioContext?.sampleRate || 48000
     const nyquist = sampleRate / 2
@@ -192,8 +209,9 @@ export function WaveformVisualizer({
       const freq = (i * nyquist) / 4
       const x = (i * width) / 4
       const label = freq >= 1000 ? `${(freq / 1000).toFixed(1)}k` : `${freq.toFixed(0)}`
-      ctx.fillText(label, x, height - 5)
+      ctx.fillText(label, x, height - 8)
     }
+    ctx.shadowBlur = 0
   }
 
   // Reset data when recording stops
@@ -204,17 +222,17 @@ export function WaveformVisualizer({
   }, [isRecording])
 
   return (
-    <div className={`bg-card border rounded-lg p-4 ${className}`}>
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-medium">Audio Visualization</span>
-        <div className="flex items-center space-x-3">
+    <div className={`glass-card rounded-2xl p-6 ${className}`}>
+      <div className="flex items-center justify-between mb-4">
+        <span className="text-lg font-semibold">Audio Visualization</span>
+        <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setVisualizationMode('waveform')}
-              className={`px-2 py-1 text-xs rounded ${
+              className={`px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
                 visualizationMode === 'waveform' 
-                  ? 'bg-primary text-primary-foreground' 
-                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                  ? 'gradient-primary text-white shadow-lg' 
+                  : 'glass border border-white/20 text-muted-foreground hover:text-white hover:bg-white/10'
               }`}
             >
               Waveform
@@ -222,18 +240,20 @@ export function WaveformVisualizer({
             <button
               onClick={() => setVisualizationMode('frequency')}
               disabled={!analyserNode}
-              className={`px-2 py-1 text-xs rounded ${
+              className={`px-3 py-1 text-xs rounded-lg transition-all duration-300 ${
                 visualizationMode === 'frequency' 
-                  ? 'bg-primary text-primary-foreground' 
-                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                  ? 'gradient-primary text-white shadow-lg' 
+                  : 'glass border border-white/20 text-muted-foreground hover:text-white hover:bg-white/10'
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               Spectrum
             </button>
           </div>
           <div className="flex items-center space-x-2">
-            <div className={`w-2 h-2 rounded-full ${isRecording ? 'bg-red-500 animate-pulse' : 'bg-gray-300'}`} />
-            <span className="text-xs text-muted-foreground">
+            <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              isRecording ? 'bg-red-500 animate-pulse glow' : 'bg-gray-400'
+            }`} />
+            <span className="text-xs text-muted-foreground font-medium">
               {isRecording ? 'Recording' : 'Ready'}
             </span>
           </div>
@@ -242,11 +262,11 @@ export function WaveformVisualizer({
       
       <canvas
         ref={canvasRef}
-        className="w-full h-32 bg-background rounded border"
+        className="w-full h-32 rounded-xl border border-white/10"
         style={{ width: '100%', height: '128px' }}
       />
       
-      <div className="mt-2 flex justify-between text-xs text-muted-foreground">
+      <div className="mt-3 flex justify-between text-xs text-muted-foreground font-medium">
         <span>
           {visualizationMode === 'waveform' 
             ? `Level: ${(level * 100).toFixed(0)}%` 
