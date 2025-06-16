@@ -128,7 +128,7 @@ export function SpaceCard({ space, onUpdate }: SpaceCardProps) {
       <div className="flex items-center gap-6 mb-6 text-sm text-muted-foreground">
         <div className="flex items-center gap-2">
           <div className="icon-container p-1 rounded">
-            <Mic className="h-3 w-3 text-white" />
+            <Mic className="h-3 w-3 icon-text" />
           </div>
           <span className="font-medium">{space.sampleIds.length} samples</span>
         </div>

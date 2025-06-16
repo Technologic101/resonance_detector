@@ -56,7 +56,7 @@ export function BottomNavigation() {
                 onClick={() => setCurrentPage(item.id)}
               >
                 <Icon className={`h-5 w-5 mb-1 transition-all duration-300 ${
-                  isActive ? 'text-white scale-110' : ''
+                  isActive ? 'icon-text scale-110' : ''
                 }`} />
                 <span className="text-xs font-medium">{item.label}</span>
               </Button>

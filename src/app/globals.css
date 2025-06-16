@@ -31,8 +31,10 @@
     --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     --gradient-success: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
     --gradient-warning: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-    --gradient-surface: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 100%);
+    --gradient-surface: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.6) 100%);
+    --icon-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --icon-bg-hover: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
   }
 
   .dark {
@@ -64,6 +66,8 @@
     --gradient-warning: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
     --gradient-surface: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
     --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    --icon-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --icon-bg-hover: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
   }
 }
 
@@ -140,18 +144,23 @@
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
   }
   
-  /* Icon containers */
+  /* Icon containers - Fixed for light mode */
   .icon-container {
-    background: var(--gradient-glass);
-    backdrop-filter: blur(12px);
+    background: var(--icon-bg);
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
   }
   
   .icon-container:hover {
-    background: var(--gradient-primary);
+    background: var(--icon-bg-hover);
     transform: scale(1.05);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  }
+  
+  /* Icon text color - Always white for contrast */
+  .icon-container .icon-text {
+    color: white !important;
   }
   
   /* Animated gradients */
@@ -173,6 +182,14 @@
       0 2px 8px rgba(0, 0, 0, 0.04),
       0 4px 16px rgba(0, 0, 0, 0.08),
       0 8px 32px rgba(0, 0, 0, 0.12);
+  }
+  
+  /* Light mode specific shadows */
+  .light .soft-shadow {
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.08),
+      0 4px 16px rgba(0, 0, 0, 0.12),
+      0 8px 32px rgba(0, 0, 0, 0.16);
   }
   
   /* Glowing effects */

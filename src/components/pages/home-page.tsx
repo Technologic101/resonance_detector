@@ -52,7 +52,7 @@ export function HomePage() {
         <div className="container mx-auto px-4 py-6 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="icon-container p-3 rounded-xl">
-              <Waves className="h-8 w-8 text-white" />
+              <Waves className="h-8 w-8 icon-text" />
             </div>
             <div>
               <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -82,7 +82,7 @@ export function HomePage() {
           <div className="glass-card rounded-2xl p-6 hover-lift soft-shadow">
             <div className="flex items-center justify-between">
               <div className="icon-container p-3 rounded-xl">
-                <Building2 className="h-8 w-8 text-white" />
+                <Building2 className="h-8 w-8 icon-text" />
               </div>
               <div className="text-right">
                 <div className="text-3xl font-bold gradient-primary bg-clip-text text-transparent">
@@ -108,7 +108,7 @@ export function HomePage() {
           <div className="glass-card rounded-2xl p-6 hover-lift soft-shadow">
             <div className="flex items-center justify-between">
               <div className="icon-container p-3 rounded-xl">
-                <Mic className="h-8 w-8 text-white" />
+                <Mic className="h-8 w-8 icon-text" />
               </div>
               <div className="text-right">
                 <div className="text-3xl font-bold gradient-accent bg-clip-text text-transparent">
@@ -164,7 +164,7 @@ export function HomePage() {
           ) : recentSamples.length === 0 ? (
             <div className="glass-card rounded-2xl p-8 text-center soft-shadow">
               <div className="icon-container p-4 rounded-2xl mx-auto mb-4 w-fit">
-                <Mic className="h-12 w-12 text-white" />
+                <Mic className="h-12 w-12 icon-text" />
               </div>
               <h4 className="text-lg font-semibold mb-2">No recordings yet</h4>
               <p className="text-muted-foreground mb-4">
@@ -178,7 +178,7 @@ export function HomePage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="icon-container p-2 rounded-lg">
-                        <Mic className="h-5 w-5 text-white" />
+                        <Mic className="h-5 w-5 icon-text" />
                       </div>
                       <div>
                         <div className="font-semibold">{getSoundTypeLabel(sample.soundType)}</div>
@@ -214,7 +214,7 @@ export function HomePage() {
             >
               <div className="flex items-center space-x-6">
                 <div className="icon-container p-4 rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                  <Mic className="h-8 w-8 text-white" />
+                  <Mic className="h-8 w-8 icon-text" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-lg mb-1">New Recording</h4>
@@ -229,7 +229,7 @@ export function HomePage() {
             >
               <div className="flex items-center space-x-6">
                 <div className="icon-container p-4 rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                  <BarChart3 className="h-8 w-8 text-white" />
+                  <BarChart3 className="h-8 w-8 icon-text" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-lg mb-1">View Analysis</h4>
