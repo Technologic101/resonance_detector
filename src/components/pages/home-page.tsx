@@ -67,21 +67,14 @@ export function HomePage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 pb-24">
-        {/* Welcome Section */}
-        <div className="glass-card rounded-2xl p-8 mb-8 hover-lift soft-shadow">
-          <div className="flex items-center space-x-6">
-            <div className="icon-container p-4 rounded-2xl floating">
-              <Waves className="h-12 w-12 text-white" />
-            </div>
-            <div>
-              <h2 className="text-3xl font-bold mb-3 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Welcome to Resonance Detection
-              </h2>
-              <p className="text-muted-foreground text-lg">
-                Analyze building acoustics and structural frequencies with precision
-              </p>
-            </div>
-          </div>
+        {/* Welcome Heading - Centered on Background */}
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+            Welcome to Resonance Detection
+          </h2>
+          <p className="text-muted-foreground text-xl">
+            Analyze building acoustics and structural frequencies with precision
+          </p>
         </div>
 
         {/* Stats Section */}
@@ -248,11 +241,11 @@ export function HomePage() {
         </div>
       </main>
 
-      {/* Floating Action Button */}
+      {/* Floating Action Button - Removed glow-pulse */}
       <div className="fixed bottom-24 right-6">
         <Button 
           size="lg" 
-          className="rounded-full shadow-2xl glow-pulse gradient-primary border-0 text-white font-semibold px-6 py-3 hover:scale-105 transition-all duration-300" 
+          className="rounded-full shadow-2xl gradient-primary border-0 text-white font-semibold px-6 py-3 hover:scale-105 transition-all duration-300" 
           onClick={handleNewSpace}
         >
           <Plus className="h-5 w-5 mr-2" />
