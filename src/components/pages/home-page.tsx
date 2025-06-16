@@ -177,9 +177,13 @@ export function HomePage() {
                 <div key={sample.id} className="glass-card rounded-xl p-4 hover-lift soft-shadow">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
-                      <div className="icon-container p-2 rounded-lg">
-                        <Mic className="h-5 w-5 icon-text" />
-                      </div>
+                      <button
+                        onClick={handleNewRecording}
+                        className="icon-container p-2 rounded-lg hover:scale-110 transition-all duration-300 group"
+                        title="Start new recording"
+                      >
+                        <Mic className="h-5 w-5 icon-text group-hover:animate-pulse" />
+                      </button>
                       <div>
                         <div className="font-semibold">{getSoundTypeLabel(sample.soundType)}</div>
                         <div className="text-sm text-muted-foreground">
