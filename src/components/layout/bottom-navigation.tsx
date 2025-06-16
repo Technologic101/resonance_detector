@@ -51,7 +51,7 @@ export function BottomNavigation() {
                 className={`flex-col h-auto py-3 px-4 transition-all duration-300 rounded-xl ${
                   isActive 
                     ? 'icon-container text-white scale-105' 
-                    : 'text-muted-foreground hover:text-white hover:bg-white/10'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-accent/50 dark:hover:text-white dark:hover:bg-white/10'
                 }`}
                 onClick={() => setCurrentPage(item.id)}
               >
