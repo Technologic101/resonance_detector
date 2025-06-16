@@ -69,7 +69,7 @@ export function HomePage() {
       <main className="container mx-auto px-4 py-8 pb-24">
         {/* Welcome Heading - Centered on Background */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-slate-700 via-slate-600 to-slate-500 dark:from-slate-300 dark:via-slate-200 dark:to-slate-100 bg-clip-text text-transparent">
             Welcome to Resonance Detection
           </h2>
           <p className="text-muted-foreground text-xl">
