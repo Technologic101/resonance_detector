@@ -33,8 +33,13 @@
     --gradient-warning: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
     --gradient-surface: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 100%);
     --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.6) 100%);
+    
+    /* Light mode - solid gradient backgrounds for icons */
     --icon-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --icon-bg-hover: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    --icon-border: rgba(255, 255, 255, 0.2);
+    --icon-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    --icon-shadow-hover: 0 8px 25px rgba(102, 126, 234, 0.4);
   }
 
   .dark {
@@ -66,8 +71,13 @@
     --gradient-warning: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
     --gradient-surface: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
     --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-    --icon-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --icon-bg-hover: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    
+    /* Dark mode - glass morphism for icons */
+    --icon-bg: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    --icon-bg-hover: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%);
+    --icon-border: rgba(255, 255, 255, 0.2);
+    --icon-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --icon-shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.4);
   }
 }
 
@@ -144,23 +154,28 @@
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
   }
   
-  /* Icon containers - Fixed for light mode */
+  /* Icon containers - Theme-specific styles */
   .icon-container {
     background: var(--icon-bg);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--icon-border);
+    backdrop-filter: blur(16px);
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    box-shadow: var(--icon-shadow);
   }
   
   .icon-container:hover {
     background: var(--icon-bg-hover);
     transform: scale(1.05);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    box-shadow: var(--icon-shadow-hover);
   }
   
-  /* Icon text color - Always white for contrast */
-  .icon-container .icon-text {
+  /* Icon text color - Theme-specific */
+  .light .icon-container .icon-text {
     color: white !important;
+  }
+  
+  .dark .icon-container .icon-text {
+    color: rgba(102, 126, 234, 1) !important;
   }
   
   /* Animated gradients */
