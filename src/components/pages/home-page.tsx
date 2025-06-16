@@ -25,7 +25,7 @@ export function HomePage() {
   }, [refetchStats, refetchSamples])
 
   const handleNewRecording = () => {
-    navigateToRecording()
+    setCurrentPage('recording')
   }
 
   const handleViewAnalysis = () => {
