@@ -93,7 +93,7 @@ export function SpaceCard({ space, onUpdate }: SpaceCardProps) {
                     setShowMenu(false)
                     // TODO: Navigate to edit
                   }}
-                  className="w-full px-4 py-2 text-left hover:bg-white/10 flex items-center gap-3 text-sm transition-colors"
+                  className="w-full px-4 py-2 pr-6 text-left hover:bg-white/10 flex items-center gap-3 text-sm transition-colors"
                 >
                   <Edit className="h-4 w-4" />
                   Edit
@@ -101,7 +101,7 @@ export function SpaceCard({ space, onUpdate }: SpaceCardProps) {
                 <button
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="w-full px-4 py-2 text-left hover:bg-white/10 flex items-center gap-3 text-red-400 text-sm transition-colors"
+                  className="w-full px-4 py-2 pr-6 text-left hover:bg-white/10 flex items-center gap-3 text-red-400 text-sm transition-colors"
                 >
                   <Trash2 className="h-4 w-4" />
                   {isDeleting ? 'Deleting...' : 'Delete'}
