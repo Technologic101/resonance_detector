@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { UserMenu } from '@/components/layout/user-menu'
 import { Waves, Mic, BarChart3, Settings, Plus, Building2 } from 'lucide-react'
 import { useNavigation } from '@/lib/context/navigation-context'
 import { useStats, useRecentSamples } from '@/lib/hooks/use-database'
@@ -62,7 +63,10 @@ export function HomePage() {
               <p className="text-sm text-muted-foreground">Acoustic Analysis Platform</p>
             </div>
           </div>
-          <ThemeToggle />
+          <div className="flex items-center space-x-3">
+            <UserMenu />
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 

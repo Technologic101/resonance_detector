@@ -1,33 +1,152 @@
 # Building Resonance Detector
 
-A web application for detecting and analyzing building resonance frequencies. This application allows users to record audio samples in different spaces, analyze the frequency characteristics, and identify potential resonance issues.
+A web application for detecting and analyzing building resonance frequencies with user authentication and cloud data storage.
 
 ## Features
 
-- Create and manage different spaces (residential, commercial, etc.)
-- Record audio samples with real-time visualization
-- Analyze frequency content and identify resonance peaks
-- Track and compare measurements over time
-- Works offline with local storage
+- **User Authentication**: Secure sign-up and sign-in with Supabase Auth
+- **Cloud Data Storage**: All spaces and recordings are saved to Supabase database
+- **Audio File Storage**: Audio recordings stored securely in Supabase Storage
+- **Multi-user Support**: Each user has their own private data
+- **Real-time Analysis**: Record audio samples with real-time visualization
+- **Frequency Analysis**: Analyze frequency content and identify resonance peaks
+- **Space Management**: Create and manage different acoustic spaces
+- **Cross-device Sync**: Access your data from any device
 
 ## Technologies Used
 
-- Next.js 15
-- React 18
-- TypeScript
-- TailwindCSS
-- IndexedDB for local storage
-- Web Audio API for audio processing
+- **Frontend**: Next.js 15, React 18, TypeScript, TailwindCSS
+- **Authentication**: Supabase Auth with email/password
+- **Database**: Supabase PostgreSQL with Row Level Security
+- **Storage**: Supabase Storage for audio files
+- **Audio Processing**: Web Audio API for real-time analysis
+- **UI Components**: Custom components with glass morphism design
 
 ## Getting Started
 
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Run the development server: `npm run dev`
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+### Prerequisites
+
+1. Node.js 18+ installed
+2. A Supabase account and project
+
+### Setup
+
+1. **Clone and install dependencies**:
+   ```bash
+   git clone <repository-url>
+   cd building-resonance-detector
+   npm install
+   ```
+
+2. **Set up Supabase**:
+   - Create a new project at [supabase.com](https://supabase.com)
+   - Go to Settings > API to get your project URL and anon key
+   - Copy `.env.local.example` to `.env.local` and fill in your Supabase credentials:
+     ```
+     NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+     NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+     ```
+
+3. **Run database migrations**:
+   ```bash
+   npx supabase db push
+   ```
+
+4. **Start the development server**:
+   ```bash
+   npm run dev
+   ```
+
+5. **Open the application**:
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+### Database Schema
+
+The application uses the following main tables:
+
+- **profiles**: User profile information
+- **spaces**: Acoustic spaces created by users
+- **samples**: Audio recordings and analysis data
+- **audio_files**: Metadata for stored audio files
+
+All tables have Row Level Security (RLS) enabled to ensure users can only access their own data.
+
+### Authentication Flow
+
+1. Users sign up with email and password
+2. Email verification is disabled by default for easier development
+3. User profiles are automatically created via database triggers
+4. All data is scoped to the authenticated user
 
 ## Project Structure
 
-- `/src/components` - React components
-- `/src/lib` - Utility functions and hooks
 - `/src/app` - Next.js app router pages
+- `/src/components` - React components
+  - `/auth` - Authentication components
+  - `/layout` - Layout components
+  - `/pages` - Page components
+  - `/ui` - Reusable UI components
+- `/src/lib` - Utility functions and hooks
+  - `/audio` - Audio processing and recording
+  - `/supabase` - Supabase client and database functions
+  - `/hooks` - Custom React hooks
+- `/supabase/migrations` - Database migration files
+
+## Key Features
+
+### Audio Recording
+- Real-time audio visualization
+- Multiple sound types (sine waves, pink noise, chirp signals, etc.)
+- Signal quality analysis
+- Frequency peak detection
+
+### Data Management
+- Create and organize acoustic spaces
+- Store recordings with metadata
+- Export analysis data
+- Cross-device synchronization
+
+### Security
+- Row Level Security ensures data privacy
+- Secure file storage with signed URLs
+- Authentication required for all operations
+
+## Development
+
+### Running Tests
+```bash
+npm run test
+```
+
+### Building for Production
+```bash
+npm run build
+```
+
+### Database Migrations
+```bash
+npx supabase db push
+```
+
+## Deployment
+
+The application can be deployed to any platform that supports Next.js:
+
+1. **Vercel** (recommended for Next.js apps)
+2. **Netlify**
+3. **Railway**
+4. **Any Node.js hosting provider**
+
+Make sure to set the environment variables in your deployment platform.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License.
