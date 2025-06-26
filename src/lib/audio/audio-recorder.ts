@@ -230,16 +230,16 @@ export class AudioRecorder {
     let wavPath: string
     switch (soundType) {
       case SoundType.LINEAR_SWEEP:
-        wavPath = '/src/lib/audio/wav/sweep20-20klin.wav'
+        wavPath = '/audio/wav/sweep20-20klin.wav'
         break
       case SoundType.LOGARITHMIC_SWEEP:
-        wavPath = '/src/lib/audio/wav/sweep20-20klog.wav'
+        wavPath = '/audio/wav/sweep20-20klog.wav'
         break
       case SoundType.PINK_NOISE:
-        wavPath = '/src/lib/audio/wav/pinknoise.wav'
+        wavPath = '/audio/wav/pinknoise.wav'
         break
       case SoundType.WHITE_NOISE:
-        wavPath = '/src/lib/audio/wav/whitenoisegaussian.wav'
+        wavPath = '/audio/wav/whitenoisegaussian.wav'
         break
       default:
         throw new Error(`No WAV file available for sound type: ${soundType}`)
