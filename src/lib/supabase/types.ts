@@ -164,7 +164,7 @@ export interface Database {
     }
     Enums: {
       space_type: 'residential' | 'commercial' | 'industrial' | 'performanceVenue' | 'educational' | 'religious' | 'other'
-      sound_type: 'sineWaveSweep' | 'pinkNoise' | 'chirpSignal' | 'handClap' | 'ambient'
+      sound_type: 'linearSweep' | 'logarithmicSweep' | 'pinkNoise' | 'whiteNoise' | 'ambient'
       signal_quality: 'excellent' | 'good' | 'fair' | 'poor'
     }
   }

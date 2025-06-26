@@ -44,16 +44,16 @@ export function getSpaceTypeIcon(type: SpaceType): string {
 
 export function getSoundTypeLabel(type: SoundType): string {
   switch (type) {
-    case SoundType.SINE_WAVE_SWEEP:
-      return 'Sine Wave Sweep'
+    case SoundType.LINEAR_SWEEP:
+      return 'Linear Sweep (20Hz-20kHz)'
+    case SoundType.LOGARITHMIC_SWEEP:
+      return 'Logarithmic Sweep (20Hz-20kHz)'
     case SoundType.PINK_NOISE:
       return 'Pink Noise'
-    case SoundType.CHIRP_SIGNAL:
-      return 'Chirp Signal'
-    case SoundType.HAND_CLAP:
-      return 'Hand Clap'
+    case SoundType.WHITE_NOISE:
+      return 'White Noise (Gaussian)'
     case SoundType.AMBIENT:
-      return 'Ambient'
+      return 'Ambient Recording'
     default:
       return 'Unknown'
   }
@@ -61,14 +61,14 @@ export function getSoundTypeLabel(type: SoundType): string {
 
 export function getSoundTypeIcon(type: SoundType): string {
   switch (type) {
-    case SoundType.SINE_WAVE_SWEEP:
+    case SoundType.LINEAR_SWEEP:
       return 'trending-up'
+    case SoundType.LOGARITHMIC_SWEEP:
+      return 'activity'
     case SoundType.PINK_NOISE:
       return 'radio'
-    case SoundType.CHIRP_SIGNAL:
-      return 'activity'
-    case SoundType.HAND_CLAP:
-      return 'hand'
+    case SoundType.WHITE_NOISE:
+      return 'zap'
     case SoundType.AMBIENT:
       return 'ear'
     default:

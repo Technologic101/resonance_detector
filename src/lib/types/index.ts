@@ -9,10 +9,10 @@ export enum SpaceType {
 }
 
 export enum SoundType {
-  SINE_WAVE_SWEEP = 'sineWaveSweep',
+  LINEAR_SWEEP = 'linearSweep',
+  LOGARITHMIC_SWEEP = 'logarithmicSweep',
   PINK_NOISE = 'pinkNoise',
-  CHIRP_SIGNAL = 'chirpSignal',
-  HAND_CLAP = 'handClap',
+  WHITE_NOISE = 'whiteNoise',
   AMBIENT = 'ambient',
 }
 
