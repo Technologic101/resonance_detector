@@ -82,7 +82,7 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
           <main className="container mx-auto px-4 py-16">
             <div className="text-center max-w-4xl mx-auto mb-16">
               <h2 className="text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Detect Building Resonance
+                Resonance Analysis
               </h2>
               <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
                 Professional acoustic analysis tool for detecting and analyzing building resonance frequencies. 
