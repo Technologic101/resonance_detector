@@ -49,9 +49,9 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    Building Resonance
+                    Vibe Finder
                   </h1>
-                  <p className="text-sm text-muted-foreground">Acoustic Analysis Platform</p>
+                  <p className="text-sm text-muted-foreground">Find Your Space's Vibe</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
