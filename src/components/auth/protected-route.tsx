@@ -4,7 +4,7 @@ import { useAuth } from './auth-provider'
 import { AuthModal } from './auth-modal'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Waves, Mic, BarChart3, Building2, Zap, Shield, Cloud, Users } from 'lucide-react'
+import { Waves, Mic, BarChart3, Building2, Zap, Shield, Cloud, Users, Music } from 'lucide-react'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -223,8 +223,8 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
                   <span className="font-medium">Building Engineers</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <Building2 className="h-8 w-8 text-primary mb-2" />
-                  <span className="font-medium">Facility Managers</span>
+                  <Music className="h-8 w-8 text-primary mb-2" />
+                  <span className="font-medium">Musicians</span>
                 </div>
                 <div className="flex flex-col items-center">
                   <Mic className="h-8 w-8 text-primary mb-2" />
@@ -237,13 +237,6 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
               </div>
             </div>
           </main>
-
-          {/* Footer */}
-          <footer className="border-t border-white/10 py-8">
-            <div className="container mx-auto px-4 text-center text-muted-foreground">
-              <p>&copy; 2025 Building Resonance Detector. Professional acoustic analysis platform.</p>
-            </div>
-          </footer>
         </div>
         
         <AuthModal
