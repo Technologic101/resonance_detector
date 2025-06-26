@@ -172,21 +172,26 @@ export class FrequencyAnalyzer {
   }
 
   private calculateNoiseFloor(frequencyData: Uint8Array): number {
-    // Calculate the median value as an estimate of the noise floor
+    // Calculate the 10th percentile as noise floor (more robust than median)
     const sorted = Array.from(frequencyData).sort((a, b) => a - b)
-    const median = sorted[Math.floor(sorted.length / 2)]
-    return median
+    const percentile10Index = Math.floor(sorted.length * 0.1)
+    const noiseFloor = sorted[percentile10Index]
+    
+    // Ensure noise floor is never zero to avoid division by zero
+    return Math.max(noiseFloor, 1)
   }
 
   private calculateSNR(peaks: FrequencyPeak[], noiseFloor: number): number {
     if (peaks.length === 0) return 0
     
     const signalPower = peaks[0].amplitude
-    const noisePower = noiseFloor
+    const noisePower = Math.max(noiseFloor, 1) // Ensure never zero
     
-    if (noisePower === 0) return Infinity
+    // Calculate SNR in dB, with reasonable bounds
+    const snr = 20 * Math.log10(signalPower / noisePower)
     
-    return 20 * Math.log10(signalPower / noisePower)
+    // Clamp SNR to reasonable range (-20 to 80 dB)
+    return Math.max(-20, Math.min(80, snr))
   }
 
   private calculateTHD(fundamental: number, harmonics: number[], peaks: FrequencyPeak[]): number {
@@ -207,6 +212,9 @@ export class FrequencyAnalyzer {
     
     if (fundamentalPower === 0) return 0
     
-    return Math.sqrt(harmonicPowerSum / fundamentalPower) * 100
+    const thd = Math.sqrt(harmonicPowerSum / fundamentalPower) * 100
+    
+    // Clamp THD to reasonable range (0 to 100%)
+    return Math.max(0, Math.min(100, thd))
   }
 }

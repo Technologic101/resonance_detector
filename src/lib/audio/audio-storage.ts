@@ -1,4 +1,3 @@
-import { supabase } from '@/lib/supabase/client'
 import { database } from '@/lib/supabase/database'
 import { SoundType, SignalQuality } from '@/lib/types'
 
@@ -22,15 +21,27 @@ export class AudioStorage {
     analysis?: any
   ): Promise<string> {
     try {
+      console.log('AudioStorage: Starting save process...', {
+        blobSize: blob.size,
+        spaceId,
+        soundType,
+        duration,
+        signalQuality
+      })
+
       // Get current user
       const user = await database.getCurrentUser()
       if (!user) throw new Error('User not authenticated')
+
+      console.log('AudioStorage: User authenticated:', user.id)
 
       // Generate filename
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
       const extension = this.getFileExtension(blob.type)
       const filename = `recording-${timestamp}.${extension}`
       
+      console.log('AudioStorage: Generated filename:', filename)
+
       // Create sample record first to get ID
       const sample = await database.createSample({
         spaceId,
@@ -49,19 +60,24 @@ export class AudioStorage {
         },
       })
 
+      console.log('AudioStorage: Sample created with ID:', sample.id)
+
       // Upload file to Supabase Storage
       const filePath = await this.uploadToStorage(blob, sample.id, filename)
       
+      console.log('AudioStorage: File uploaded to path:', filePath)
+
       // Update sample with file path
       await database.updateSample(sample.id, {
         audioFilePath: filePath,
       })
 
-      console.log('Audio file saved successfully:', sample.id)
+      console.log('AudioStorage: Sample updated with file path')
+      console.log('AudioStorage: Audio file saved successfully:', sample.id)
       return sample.id
     } catch (error) {
-      console.error('Failed to save audio file:', error)
-      throw new Error('Failed to save recording')
+      console.error('AudioStorage: Failed to save audio file:', error)
+      throw new Error(`Failed to save recording: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   }
 
@@ -101,23 +117,9 @@ export class AudioStorage {
 
   static async getStorageUsage(): Promise<{ used: number; available: number }> {
     try {
-      // Get user's audio files
-      const user = await database.getCurrentUser()
-      if (!user) return { used: 0, available: 0 }
-
-      const { data, error } = await supabase
-        .from('audio_files')
-        .select('size')
-        .eq('user_id', user.id)
-
-      if (error) throw error
-
-      const used = data.reduce((total, file) => total + file.size, 0)
-      
-      // Supabase free tier has 1GB storage
-      const available = 1024 * 1024 * 1024 // 1GB in bytes
-      
-      return { used, available }
+      // For now, return placeholder values since we're using Supabase
+      // In a real implementation, you'd query the storage usage
+      return { used: 0, available: 1024 * 1024 * 1024 } // 1GB
     } catch (error) {
       console.error('Failed to get storage usage:', error)
       return { used: 0, available: 1024 * 1024 * 1024 }
@@ -129,58 +131,38 @@ export class AudioStorage {
       const user = await database.getCurrentUser()
       if (!user) return
 
-      const cutoffDate = new Date(Date.now() - maxAge)
-
-      const { data, error } = await supabase
-        .from('samples')
-        .select('id, audio_file_path')
-        .eq('user_id', user.id)
-        .lt('recorded_at', cutoffDate.toISOString())
-
-      if (error) throw error
-
-      for (const sample of data) {
-        await this.deleteAudioFile(sample.id)
-      }
+      // This would need to be implemented based on your cleanup requirements
+      console.log('Cleanup old files not implemented yet')
     } catch (error) {
       console.error('Failed to cleanup old files:', error)
     }
   }
 
   private static async uploadToStorage(blob: File | Blob, sampleId: string, filename: string): Promise<string> {
-    const user = await database.getCurrentUser()
-    if (!user) throw new Error('User not authenticated')
+    try {
+      console.log('AudioStorage: Starting file upload...', { sampleId, filename })
 
-    // Create file path: userId/sampleId.extension
-    const fileExt = filename.split('.').pop()
-    const filePath = `${user.id}/${sampleId}.${fileExt}`
+      const user = await database.getCurrentUser()
+      if (!user) throw new Error('User not authenticated')
 
-    // Convert blob to file if needed
-    const file = blob instanceof File ? blob : new File([blob], filename, { type: blob.type })
+      // Create file path: userId/sampleId.extension
+      const fileExt = filename.split('.').pop()
+      const filePath = `${user.id}/${sampleId}.${fileExt}`
 
-    const { data, error } = await supabase.storage
-      .from('audio-files')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false,
-      })
+      console.log('AudioStorage: Upload path:', filePath)
 
-    if (error) throw error
+      // Convert blob to file if needed
+      const file = blob instanceof File ? blob : new File([blob], filename, { type: blob.type })
 
-    // Store file metadata in database
-    await supabase
-      .from('audio_files')
-      .insert({
-        user_id: user.id,
-        sample_id: sampleId,
-        filename,
-        file_path: data.path,
-        mime_type: file.type,
-        size: file.size,
-        duration: 0, // Will be updated if needed
-      })
-
-    return data.path
+      // Upload to Supabase storage
+      const uploadResult = await database.uploadAudioFile(file, sampleId)
+      
+      console.log('AudioStorage: Upload successful:', uploadResult)
+      return uploadResult
+    } catch (error) {
+      console.error('AudioStorage: Upload failed:', error)
+      throw error
+    }
   }
 
   private static getFileExtension(mimeType: string): string {

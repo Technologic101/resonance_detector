@@ -72,10 +72,9 @@ export function RecordingControls({
           <div className="text-center">
             <Button
               size="lg"
-              variant="outline"
               onClick={onPause}
               disabled={disabled}
-              className="glass border-2 border-white/30 rounded-full w-16 h-16 hover:bg-white/10 hover:scale-105 transition-all duration-300"
+              className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white rounded-full w-16 h-16 shadow-xl hover:scale-105 transition-all duration-300 border-0"
             >
               <Pause className="h-6 w-6" />
             </Button>
@@ -88,10 +87,9 @@ export function RecordingControls({
           <div className="text-center">
             <Button
               size="lg"
-              variant="outline"
               onClick={onStop}
               disabled={disabled}
-              className="glass border-2 border-white/30 rounded-full w-16 h-16 hover:bg-white/10 hover:scale-105 transition-all duration-300"
+              className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-full w-16 h-16 shadow-xl hover:scale-105 transition-all duration-300 border-0"
             >
               <Square className="h-6 w-6" />
             </Button>

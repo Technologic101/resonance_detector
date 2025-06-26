@@ -21,6 +21,7 @@ export function RecordingPage() {
   const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   const {
     isInitialized,
@@ -70,6 +71,7 @@ export function RecordingPage() {
       await startRecording(selectedSoundType)
       setRecordingBlob(null)
       setSaveSuccess(false)
+      setSaveError(null)
     } catch (error) {
       console.error('Failed to start recording:', error)
       alert('Failed to start recording. Please check your microphone permissions.')
@@ -92,13 +94,24 @@ export function RecordingPage() {
     if (!recordingBlob || !selectedSpaceId) return
 
     setIsSaving(true)
+    setSaveError(null)
+    
     try {
+      console.log('Starting save process...', {
+        blobSize: recordingBlob.size,
+        spaceId: selectedSpaceId,
+        soundType: selectedSoundType,
+        duration: recordingState.duration
+      })
+
       await saveRecording(
         recordingBlob,
         selectedSpaceId,
         selectedSoundType,
         analysis?.signalQuality as SignalQuality
       )
+      
+      console.log('Recording saved successfully')
       setSaveSuccess(true)
       setRecordingBlob(null)
       
@@ -108,7 +121,8 @@ export function RecordingPage() {
       }, 2000)
     } catch (error) {
       console.error('Failed to save recording:', error)
-      alert('Failed to save recording.')
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      setSaveError(`Failed to save recording: ${errorMessage}`)
     } finally {
       setIsSaving(false)
     }
@@ -227,13 +241,13 @@ export function RecordingPage() {
           </div>
         )}
 
-        {/* Error Message */}
-        {recordingState.error && (
+        {/* Error Messages */}
+        {(recordingState.error || saveError) && (
           <div className="mb-6 p-4 bg-red-100 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
             <div className="flex items-center space-x-2">
               <AlertCircle className="h-5 w-5 text-red-600" />
               <span className="text-red-800 dark:text-red-200">
-                {recordingState.error}
+                {recordingState.error || saveError}
               </span>
             </div>
           </div>
@@ -285,7 +299,10 @@ export function RecordingPage() {
                     ))}
                   </select>
                   <p className="text-xs text-muted-foreground mt-1">
-                    The selected sound will play when recording starts
+                    {selectedSoundType === SoundType.AMBIENT 
+                      ? 'Record ambient room sound without test signals'
+                      : 'The selected test signal will play when recording starts'
+                    }
                   </p>
                 </div>
               </div>
@@ -330,7 +347,10 @@ export function RecordingPage() {
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">SNR</span>
                       <span className="font-mono">
-                        {analysis.frequencyAnalysis.snr.toFixed(1)} dB
+                        {isFinite(analysis.frequencyAnalysis.snr) 
+                          ? `${analysis.frequencyAnalysis.snr.toFixed(1)} dB`
+                          : 'N/A'
+                        }
                       </span>
                     </div>
                   </>
