@@ -7,7 +7,7 @@ import { AuthProvider } from '@/components/auth/auth-provider'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Building Resonance Detector',
+  title: 'Vibe Finder',
   description: 'A web application for detecting and analyzing building resonance frequencies',
 }
 
