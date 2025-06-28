@@ -1,6 +1,7 @@
 import { supabase } from './client'
 import { Database } from './types'
 import { Space, Sample, CreateSpaceData, CreateSampleData, SpaceType, SoundType, SignalQuality } from '@/lib/types'
+import type { User } from '@supabase/supabase-js'
 
 type Tables = Database['public']['Tables']
 type SpaceRow = Tables['spaces']['Row']
@@ -10,9 +11,14 @@ type ProfileRow = Tables['profiles']['Row']
 class SupabaseDatabase {
   // Auth helpers
   async getCurrentUser() {
-    const { data: { user }, error } = await supabase.auth.getUser()
-    if (error) throw error
-    return user
+    try {
+      const { data: { user }, error } = await supabase.auth.getUser()
+      if (error) return null
+      return user
+    } catch (error) {
+      console.error('Failed to get current user:', error)
+      return null
+    }
   }
 
   async signUp(email: string, password: string, fullName?: string) {
@@ -179,10 +185,7 @@ class SupabaseDatabase {
   }
 
   // Sample operations
-  async createSample(data: CreateSampleData): Promise<Sample> {
-    const user = await this.getCurrentUser()
-    if (!user) throw new Error('User not authenticated')
-
+  async createSample(user: User, data: CreateSampleData): Promise<Sample> {
     const { data: sampleData, error } = await supabase
       .from('samples')
       .insert({
@@ -316,10 +319,7 @@ class SupabaseDatabase {
   }
 
   // Audio file operations
-  async uploadAudioFile(file: File, sampleId: string): Promise<string> {
-    const user = await this.getCurrentUser()
-    if (!user) throw new Error('User not authenticated')
-
+  async uploadAudioFile(user: User, file: File, sampleId: string): Promise<string> {
     const fileExt = file.name.split('.').pop()
     const fileName = `${user.id}/${sampleId}.${fileExt}`
 

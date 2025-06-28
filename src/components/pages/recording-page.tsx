@@ -8,6 +8,7 @@ import { LevelMeter } from '@/components/ui/level-meter'
 import { RecordingControls } from '@/components/ui/recording-controls'
 import { Mic, ArrowLeft, AlertCircle, CheckCircle, Clock, Building2, Activity, Zap } from 'lucide-react'
 import { useNavigation } from '@/lib/context/navigation-context'
+import { useAuth } from '@/components/auth/auth-provider'
 import { useAudioRecorder } from '@/lib/hooks/use-audio-recorder'
 import { useSpaces } from '@/lib/hooks/use-database'
 import { SoundType, SignalQuality } from '@/lib/types'
@@ -15,6 +16,7 @@ import { formatDuration, getSoundTypeLabel } from '@/lib/utils/space-utils'
 
 export function RecordingPage() {
   const { setCurrentPage, navigationState } = useNavigation()
+  const { user } = useAuth()
   const { spaces } = useSpaces()
   const [selectedSpaceId, setSelectedSpaceId] = useState<string>(navigationState.selectedSpaceId || '')
   const [selectedSoundType, setSelectedSoundType] = useState<SoundType>(SoundType.AMBIENT)
@@ -49,6 +51,7 @@ export function RecordingPage() {
       enableNoiseSuppression: false,
       enableAutoGainControl: false,
     },
+    user,
   })
 
   // Get audio nodes for visualization
@@ -106,6 +109,12 @@ export function RecordingPage() {
         blobSize: recordingBlob?.size,
         spaceId: selectedSpaceId 
       })
+      return
+    }
+
+    if (!user) {
+      console.error('Cannot save: user not authenticated')
+      setSaveError('User not authenticated. Please log in again.')
       return
     }
 

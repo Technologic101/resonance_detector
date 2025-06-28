@@ -2,10 +2,12 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { AudioRecorder, RecordingState, AudioAnalysis, AudioRecorderConfig } from '@/lib/audio/audio-recorder'
 import { AudioStorage } from '@/lib/audio/audio-storage'
 import { SoundType, SignalQuality } from '@/lib/types'
+import type { User } from '@supabase/supabase-js'
 
 export interface UseAudioRecorderOptions {
   config?: AudioRecorderConfig
   autoSave?: boolean
+  user?: User | null
 }
 
 export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
@@ -21,7 +23,7 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
   const [isPermissionGranted, setIsPermissionGranted] = useState<boolean | null>(null)
   
   const recorderRef = useRef<AudioRecorder | null>(null)
-  const { config = {}, autoSave = true } = options
+  const { config = {}, autoSave = true, user } = options
 
   // Initialize recorder
   const initialize = useCallback(async () => {
@@ -169,6 +171,10 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
         duration: recordingState.duration 
       })
       
+      if (!user) {
+        throw new Error('User not authenticated')
+      }
+      
       const duration = recordingState.duration
       const quality = signalQuality || (analysis?.signalQuality as SignalQuality) || SignalQuality.GOOD
       
@@ -191,6 +197,7 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
       } : undefined
 
       const sampleId = await AudioStorage.saveAudioFile(
+        user,
         blob,
         spaceId,
         soundType,
@@ -205,7 +212,7 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
       console.error('Failed to save recording:', error)
       throw error
     }
-  }, [recordingState.duration, analysis])
+  }, [recordingState.duration, analysis, user])
 
   // Get storage info
   const getStorageInfo = useCallback(async () => {
