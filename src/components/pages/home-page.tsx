@@ -75,7 +75,7 @@ export function HomePage() {
         {/* Welcome Heading - Centered on Background */}
         <div className="text-center mb-12">
           <h2 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Welcome to Resonance Detection
+            Welcome to Vibe Finder
           </h2>
           <p className="text-muted-foreground text-xl">
             Analyze building acoustics and structural frequencies with precision
