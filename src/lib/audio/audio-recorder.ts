@@ -179,6 +179,7 @@ export class AudioRecorder {
       console.log('AudioRecorder: Data available, size:', event.data.size)
       if (event.data.size > 0) {
         this.chunks.push(event.data)
+        console.log('AudioRecorder: Total chunks now:', this.chunks.length)
       }
     }
 
@@ -210,6 +211,8 @@ export class AudioRecorder {
 
     this.mediaRecorder.onstart = () => {
       console.log('AudioRecorder: MediaRecorder started')
+      // Clear any existing chunks when starting
+      this.chunks = []
     }
 
     this.mediaRecorder.onerror = (event) => {
@@ -436,6 +439,7 @@ export class AudioRecorder {
           console.log('AudioRecorder: Creating blob from chunks:', this.chunks.length)
           
           if (this.chunks.length === 0) {
+            console.error('AudioRecorder: No chunks available for blob creation')
             reject(new Error('No audio data recorded'))
             return
           }
@@ -446,6 +450,7 @@ export class AudioRecorder {
           console.log('AudioRecorder: Created blob, size:', blob.size, 'type:', blob.type)
           
           if (blob.size === 0) {
+            console.error('AudioRecorder: Blob is empty despite having chunks')
             reject(new Error('Recording blob is empty'))
             return
           }
@@ -462,7 +467,7 @@ export class AudioRecorder {
           })
           
           resolve(blob)
-        }, 100) // Small delay to ensure all chunks are collected
+        }, 200) // Increased delay to ensure all chunks are collected
       }
 
       // Stop the recording

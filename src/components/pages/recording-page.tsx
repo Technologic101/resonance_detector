@@ -68,10 +68,13 @@ export function RecordingPage() {
     }
 
     try {
-      await startRecording(selectedSoundType)
+      // Clear any previous recording blob
       setRecordingBlob(null)
       setSaveSuccess(false)
       setSaveError(null)
+      
+      await startRecording(selectedSoundType)
+      console.log('Recording started successfully')
     } catch (error) {
       console.error('Failed to start recording:', error)
       alert('Failed to start recording. Please check your microphone permissions.')
@@ -89,6 +92,7 @@ export function RecordingPage() {
       }
       
       setRecordingBlob(blob)
+      console.log('Recording blob set in state, size:', blob.size)
     } catch (error) {
       console.error('Failed to stop recording:', error)
       alert(`Failed to stop recording: ${error instanceof Error ? error.message : 'Unknown error'}`)
@@ -99,6 +103,7 @@ export function RecordingPage() {
     if (!recordingBlob || !selectedSpaceId) {
       console.error('Cannot save: missing blob or space ID', { 
         hasBlob: !!recordingBlob, 
+        blobSize: recordingBlob?.size,
         spaceId: selectedSpaceId 
       })
       return
@@ -396,9 +401,14 @@ export function RecordingPage() {
               )}
 
               {recordingBlob && (
-                <p className="text-sm text-green-600 text-center mt-4">
-                  Recording ready to save! ({(recordingBlob.size / 1024).toFixed(1)} KB)
-                </p>
+                <div className="text-center mt-4">
+                  <p className="text-sm text-green-600 font-medium">
+                    Recording ready to save! ({(recordingBlob.size / 1024).toFixed(1)} KB)
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Duration: {formatDuration(recordingState.duration || 0)}
+                  </p>
+                </div>
               )}
 
               {isSaving && (
