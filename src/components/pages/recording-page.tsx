@@ -83,6 +83,11 @@ export function RecordingPage() {
       console.log('Attempting to stop recording...')
       const blob = await stopRecording()
       console.log('Recording stopped successfully, blob size:', blob.size)
+      
+      if (blob.size === 0) {
+        throw new Error('Recording is empty')
+      }
+      
       setRecordingBlob(blob)
     } catch (error) {
       console.error('Failed to stop recording:', error)
@@ -91,7 +96,13 @@ export function RecordingPage() {
   }
 
   const handleSaveRecording = async () => {
-    if (!recordingBlob || !selectedSpaceId) return
+    if (!recordingBlob || !selectedSpaceId) {
+      console.error('Cannot save: missing blob or space ID', { 
+        hasBlob: !!recordingBlob, 
+        spaceId: selectedSpaceId 
+      })
+      return
+    }
 
     setIsSaving(true)
     setSaveError(null)
@@ -386,7 +397,7 @@ export function RecordingPage() {
 
               {recordingBlob && (
                 <p className="text-sm text-green-600 text-center mt-4">
-                  Recording ready to save!
+                  Recording ready to save! ({(recordingBlob.size / 1024).toFixed(1)} KB)
                 </p>
               )}
 

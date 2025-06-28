@@ -183,7 +183,7 @@ export class AudioRecorder {
     }
 
     this.mediaRecorder.onstop = () => {
-      console.log('AudioRecorder: MediaRecorder stopped')
+      console.log('AudioRecorder: MediaRecorder stopped, chunks:', this.chunks.length)
       this.stopAnalysis()
       this.stopTestAudio()
       if (this.recordingTimeout) {
@@ -413,7 +413,7 @@ export class AudioRecorder {
         return
       }
 
-      console.log('AudioRecorder: Stopping recording, duration:', duration)
+      console.log('AudioRecorder: Stopping recording, duration:', duration, 'chunks before stop:', this.chunks.length)
 
       // Clear any auto-stop timeout
       if (this.recordingTimeout) {
@@ -423,27 +423,46 @@ export class AudioRecorder {
 
       // Set up the stop handler before stopping
       const originalOnStop = this.mediaRecorder.onstop
-      this.mediaRecorder.onstop = () => {
+      this.mediaRecorder.onstop = (event) => {
+        console.log('AudioRecorder: Stop event fired, chunks after stop:', this.chunks.length)
+        
         // Call original handler first
         if (originalOnStop) {
-          originalOnStop.call(this.mediaRecorder, new Event('stop'))
+          originalOnStop.call(this.mediaRecorder, event)
         }
 
-        const mimeType = this.getSupportedMimeType()
-        const blob = new Blob(this.chunks, { type: mimeType })
-        this.chunks = []
-        
-        console.log('AudioRecorder: Created blob, size:', blob.size)
-        
-        this.updateState({
-          isRecording: false,
-          isPaused: false,
-          duration: 0,
-          level: 0,
-          error: null,
-        })
-        
-        resolve(blob)
+        // Wait a bit for any final chunks
+        setTimeout(() => {
+          console.log('AudioRecorder: Creating blob from chunks:', this.chunks.length)
+          
+          if (this.chunks.length === 0) {
+            reject(new Error('No audio data recorded'))
+            return
+          }
+
+          const mimeType = this.getSupportedMimeType()
+          const blob = new Blob(this.chunks, { type: mimeType })
+          
+          console.log('AudioRecorder: Created blob, size:', blob.size, 'type:', blob.type)
+          
+          if (blob.size === 0) {
+            reject(new Error('Recording blob is empty'))
+            return
+          }
+          
+          // Clear chunks after creating blob
+          this.chunks = []
+          
+          this.updateState({
+            isRecording: false,
+            isPaused: false,
+            duration: 0,
+            level: 0,
+            error: null,
+          })
+          
+          resolve(blob)
+        }, 100) // Small delay to ensure all chunks are collected
       }
 
       // Stop the recording
@@ -553,11 +572,12 @@ export class AudioRecorder {
     else if (peak > 0.05) score += 10
     else score += 5
     
-    // Signal-to-noise ratio (0-25 points)
-    if (snr > 40) score += 25
-    else if (snr > 30) score += 20
-    else if (snr > 20) score += 15
-    else if (snr > 10) score += 10
+    // Signal-to-noise ratio (0-25 points) - handle infinity
+    const validSnr = isFinite(snr) ? snr : 0
+    if (validSnr > 40) score += 25
+    else if (validSnr > 30) score += 20
+    else if (validSnr > 20) score += 15
+    else if (validSnr > 10) score += 10
     else score += 5
     
     // Frequency content (0-25 points)

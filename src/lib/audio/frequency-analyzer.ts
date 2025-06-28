@@ -187,11 +187,17 @@ export class FrequencyAnalyzer {
     const signalPower = peaks[0].amplitude
     const noisePower = Math.max(noiseFloor, 1) // Ensure never zero
     
+    // Avoid division by zero and handle edge cases
+    if (noisePower === 0 || signalPower === 0) return 0
+    
     // Calculate SNR in dB, with reasonable bounds
-    const snr = 20 * Math.log10(signalPower / noisePower)
+    const ratio = signalPower / noisePower
+    if (!isFinite(ratio) || ratio <= 0) return 0
+    
+    const snr = 20 * Math.log10(ratio)
     
     // Clamp SNR to reasonable range (-20 to 80 dB)
-    return Math.max(-20, Math.min(80, snr))
+    return Math.max(-20, Math.min(80, isFinite(snr) ? snr : 0))
   }
 
   private calculateTHD(fundamental: number, harmonics: number[], peaks: FrequencyPeak[]): number {
@@ -215,6 +221,6 @@ export class FrequencyAnalyzer {
     const thd = Math.sqrt(harmonicPowerSum / fundamentalPower) * 100
     
     // Clamp THD to reasonable range (0 to 100%)
-    return Math.max(0, Math.min(100, thd))
+    return Math.max(0, Math.min(100, isFinite(thd) ? thd : 0))
   }
 }
