@@ -47,6 +47,8 @@ export class AudioRecorder {
   private recordingTimeout: number | null = null
   private currentSoundType: SoundType = SoundType.AMBIENT
   private currentAudioDuration: number = 0 // Duration of the loaded audio file
+  private stopRecordingResolver: ((blob: Blob) => void) | null = null
+  private stopRecordingRejecter: ((error: Error) => void) | null = null
   
   private config: Required<AudioRecorderConfig>
   private onStateChange: (state: RecordingState) => void
@@ -193,6 +195,47 @@ export class AudioRecorder {
         clearTimeout(this.recordingTimeout)
         this.recordingTimeout = null
       }
+
+      // Handle the stop recording promise resolution
+      if (this.stopRecordingResolver || this.stopRecordingRejecter) {
+        console.log('AudioRecorder: Creating blob from chunks:', this.chunks.length)
+        
+        if (this.chunks.length === 0) {
+          console.error('AudioRecorder: No chunks available for blob creation')
+          if (this.stopRecordingRejecter) {
+            this.stopRecordingRejecter(new Error('No audio data recorded'))
+          }
+        } else {
+          const mimeType = this.getSupportedMimeType()
+          const blob = new Blob(this.chunks, { type: mimeType })
+          
+          console.log('AudioRecorder: Created blob, size:', blob.size, 'type:', blob.type)
+          
+          if (blob.size === 0) {
+            console.error('AudioRecorder: Blob is empty despite having chunks')
+            if (this.stopRecordingRejecter) {
+              this.stopRecordingRejecter(new Error('Recording blob is empty'))
+            }
+          } else if (this.stopRecordingResolver) {
+            this.stopRecordingResolver(blob)
+          }
+        }
+        
+        // Clear the promise handlers
+        this.stopRecordingResolver = null
+        this.stopRecordingRejecter = null
+        
+        // Clear chunks after creating blob
+        this.chunks = []
+        
+        this.updateState({
+          isRecording: false,
+          isPaused: false,
+          duration: 0,
+          level: 0,
+          error: null,
+        })
+      }
     }
 
     this.mediaRecorder.onpause = () => {
@@ -219,6 +262,14 @@ export class AudioRecorder {
 
     this.mediaRecorder.onerror = (event) => {
       console.error('AudioRecorder: MediaRecorder error:', event)
+      
+      // Handle error in stop recording promise if active
+      if (this.stopRecordingRejecter) {
+        this.stopRecordingRejecter(new Error('Recording error occurred'))
+        this.stopRecordingResolver = null
+        this.stopRecordingRejecter = null
+      }
+      
       this.updateState({
         isRecording: false,
         isPaused: false,
@@ -461,57 +512,17 @@ export class AudioRecorder {
         this.recordingTimeout = null
       }
 
-      // Set up the stop handler before stopping
-      const originalOnStop = this.mediaRecorder.onstop
-      this.mediaRecorder.onstop = (event) => {
-        console.log('AudioRecorder: Stop event fired, chunks after stop:', this.chunks.length)
-        
-        // Call original handler first
-        if (originalOnStop) {
-          originalOnStop.call(this.mediaRecorder, event)
-        }
+      // Store the promise handlers for the onstop event to use
+      this.stopRecordingResolver = resolve
+      this.stopRecordingRejecter = reject
 
-        // Wait a bit for any final chunks
-        setTimeout(() => {
-          console.log('AudioRecorder: Creating blob from chunks:', this.chunks.length)
-          
-          if (this.chunks.length === 0) {
-            console.error('AudioRecorder: No chunks available for blob creation')
-            reject(new Error('No audio data recorded'))
-            return
-          }
-
-          const mimeType = this.getSupportedMimeType()
-          const blob = new Blob(this.chunks, { type: mimeType })
-          
-          console.log('AudioRecorder: Created blob, size:', blob.size, 'type:', blob.type)
-          
-          if (blob.size === 0) {
-            console.error('AudioRecorder: Blob is empty despite having chunks')
-            reject(new Error('Recording blob is empty'))
-            return
-          }
-          
-          // Clear chunks after creating blob
-          this.chunks = []
-          
-          this.updateState({
-            isRecording: false,
-            isPaused: false,
-            duration: 0,
-            level: 0,
-            error: null,
-          })
-          
-          resolve(blob)
-        }, 200) // Increased delay to ensure all chunks are collected
-      }
-
-      // Stop the recording
+      // Stop the recording - the onstop event will handle blob creation and promise resolution
       try {
         this.mediaRecorder.stop()
       } catch (error) {
         console.error('AudioRecorder: Error stopping MediaRecorder:', error)
+        this.stopRecordingResolver = null
+        this.stopRecordingRejecter = null
         reject(error)
       }
     })
@@ -695,6 +706,10 @@ export class AudioRecorder {
     if (this.audioContext && this.audioContext.state !== 'closed') {
       this.audioContext.close()
     }
+    
+    // Clear any pending promise handlers
+    this.stopRecordingResolver = null
+    this.stopRecordingRejecter = null
     
     this.mediaRecorder = null
     this.audioContext = null
