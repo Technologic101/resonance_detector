@@ -46,6 +46,7 @@ export class AudioRecorder {
   private testAudioGain: GainNode | null = null
   private recordingTimeout: number | null = null
   private currentSoundType: SoundType = SoundType.AMBIENT
+  private currentAudioDuration: number = 0 // Duration of the loaded audio file
   
   private config: Required<AudioRecorderConfig>
   private onStateChange: (state: RecordingState) => void
@@ -274,6 +275,9 @@ export class AudioRecorder {
       // Load the WAV file
       const audioBuffer = await this.loadWavFile(soundType)
 
+      // Store the audio duration for progress tracking
+      this.currentAudioDuration = audioBuffer.duration
+
       // Create gain node for volume control
       this.testAudioGain = this.audioContext.createGain()
       this.testAudioGain.connect(this.audioContext.destination)
@@ -312,6 +316,7 @@ export class AudioRecorder {
       this.testAudioGain.disconnect()
       this.testAudioGain = null
     }
+    this.currentAudioDuration = 0
   }
 
   private getMaxDurationForSoundType(soundType: SoundType): number {
@@ -319,8 +324,17 @@ export class AudioRecorder {
     if (soundType === SoundType.AMBIENT) {
       return 20
     }
+    // For WAV files, use the actual audio file duration instead of the config max
+    if (this.currentAudioDuration > 0) {
+      return this.currentAudioDuration + 0.5 // Add small buffer
+    }
     // Use default max duration for other sound types
     return this.config.maxDuration
+  }
+
+  // Get the current audio duration for UI progress tracking
+  getCurrentAudioDuration(): number {
+    return this.currentAudioDuration
   }
 
   async startRecording(soundType: SoundType = SoundType.AMBIENT): Promise<void> {

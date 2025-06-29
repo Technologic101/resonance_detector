@@ -69,10 +69,23 @@ export function RecordingPage() {
     if (soundType === SoundType.AMBIENT) {
       return 20 // 20 seconds for ambient recordings
     }
-    return 300 // 5 minutes for other types
+    return 300 // 5 minutes for other types (will be overridden by actual WAV duration)
   }
 
-  const maxDuration = getMaxDurationForSoundType(selectedSoundType)
+  // Get the actual max duration for the current recording
+  const getActualMaxDuration = (): number => {
+    if (selectedSoundType === SoundType.AMBIENT) {
+      return 20
+    }
+    // For WAV files, get the actual audio duration from the recorder
+    const audioDuration = (window as any).audioRecorderInstance?.getCurrentAudioDuration?.() || 0
+    if (audioDuration > 0) {
+      return audioDuration + 0.5 // Add small buffer
+    }
+    return getMaxDurationForSoundType(selectedSoundType)
+  }
+
+  const maxDuration = getActualMaxDuration()
 
   const handleStartRecording = async () => {
     if (!selectedSpaceId) {
@@ -335,7 +348,7 @@ export function RecordingPage() {
                   </select>
                   <p className="text-xs text-muted-foreground mt-1">
                     {selectedSoundType === SoundType.AMBIENT 
-                      ? `Record ambient room sound (max ${maxDuration} seconds)`
+                      ? `Record ambient room sound (max ${getMaxDurationForSoundType(selectedSoundType)} seconds)`
                       : 'The selected test signal will play when recording starts'
                     }
                   </p>
@@ -361,8 +374,8 @@ export function RecordingPage() {
                   </div>
                 </div>
 
-                {/* Duration progress bar for ambient recordings */}
-                {selectedSoundType === SoundType.AMBIENT && (recordingState.isRecording || recordingState.isPaused) && (
+                {/* Duration progress bar for ambient recordings or WAV files */}
+                {(selectedSoundType === SoundType.AMBIENT || selectedSoundType !== SoundType.AMBIENT) && (recordingState.isRecording || recordingState.isPaused) && (
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                     <div 
                       className="bg-primary h-2 rounded-full transition-all duration-300"

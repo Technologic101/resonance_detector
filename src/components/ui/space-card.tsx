@@ -60,20 +60,17 @@ export function SpaceCard({ space, onUpdate }: SpaceCardProps) {
   return (
     <div className="glass-card rounded-2xl p-6 hover-lift soft-shadow transition-all duration-300 relative group">
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <button
             onClick={handleTitleClick}
-            className="text-left hover:text-primary transition-colors"
+            className="text-left hover:text-primary transition-colors w-full"
             disabled={isDeleting}
           >
             <h3 className="font-bold text-xl mb-2 hover:underline bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               {space.name}
             </h3>
           </button>
-          <div className="inline-block px-3 py-1 rounded-full text-sm font-medium gradient-accent text-white">
-            {getSpaceTypeLabel(space.type)}
-          </div>
         </div>
         <div className="relative">
           <Button
@@ -87,13 +84,13 @@ export function SpaceCard({ space, onUpdate }: SpaceCardProps) {
           </Button>
           {showMenu && (
             <>
-              <div className="absolute right-0 top-8 glass-card border border-white/20 rounded-xl shadow-xl py-2 z-20 min-w-[140px]">
+              <div className="absolute right-0 top-8 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border border-white/30 dark:border-gray-700/50 rounded-xl shadow-xl py-2 z-20 min-w-[140px]">
                 <button
                   onClick={() => {
                     setShowMenu(false)
                     // TODO: Navigate to edit
                   }}
-                  className="w-full px-4 py-2 text-left hover:bg-white/10 flex items-center gap-3 text-sm transition-colors"
+                  className="w-full px-4 py-2 text-left hover:bg-black/10 dark:hover:bg-white/10 flex items-center gap-3 text-sm transition-colors text-gray-900 dark:text-gray-100"
                 >
                   <Edit className="h-4 w-4" />
                   Edit
@@ -101,7 +98,7 @@ export function SpaceCard({ space, onUpdate }: SpaceCardProps) {
                 <button
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="w-full px-4 py-2 text-left hover:bg-white/10 flex items-center gap-3 text-red-400 text-sm transition-colors"
+                  className="w-full px-4 py-2 text-left hover:bg-black/10 dark:hover:bg-white/10 flex items-center gap-3 text-red-600 dark:text-red-400 text-sm transition-colors"
                 >
                   <Trash2 className="h-4 w-4" />
                   {isDeleting ? 'Deleting...' : 'Delete'}
@@ -115,6 +112,13 @@ export function SpaceCard({ space, onUpdate }: SpaceCardProps) {
             </>
           )}
         </div>
+      </div>
+
+      {/* Space Type - moved below title */}
+      <div className="mb-4">
+        <span className="text-sm font-medium text-primary">
+          {getSpaceTypeLabel(space.type)}
+        </span>
       </div>
 
       {/* Description */}
