@@ -1,5 +1,5 @@
 {
-  "name": "building-resonance-detector",
+  "name": "vibe-finder",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -11,7 +11,11 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:ci": "jest --ci --coverage --watchAll=false",
-    "export": "next export"
+    "export": "next export",
+    "db:dev": "supabase db push --project-ref $SUPABASE_DEV_PROJECT_REF",
+    "db:prod": "supabase db push --project-ref $SUPABASE_PROD_PROJECT_REF",
+    "env:dev": "echo 'NEXT_PUBLIC_APP_ENV=development' >> .env.local",
+    "env:prod": "echo 'NEXT_PUBLIC_APP_ENV=production' >> .env.local"
   },
   "dependencies": {
     "react": "^18.2.0",
