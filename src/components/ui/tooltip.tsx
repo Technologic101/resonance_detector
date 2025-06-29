@@ -103,10 +103,10 @@ export function Tooltip({ content, children, className = '', side = 'top' }: Too
             />
           )}
           
-          {/* Tooltip */}
+          {/* Tooltip - Made wider and more readable */}
           <div
             ref={tooltipRef}
-            className={`absolute z-50 px-3 py-2 text-sm text-white bg-gray-900 dark:bg-gray-100 dark:text-gray-900 rounded-lg shadow-lg max-w-xs whitespace-normal ${getTooltipPosition()}`}
+            className={`absolute z-50 px-4 py-3 text-sm leading-relaxed text-white bg-gray-900 dark:bg-gray-100 dark:text-gray-900 rounded-lg shadow-xl min-w-[200px] max-w-[320px] whitespace-normal ${getTooltipPosition()}`}
             style={{ wordBreak: 'break-word' }}
           >
             {content}

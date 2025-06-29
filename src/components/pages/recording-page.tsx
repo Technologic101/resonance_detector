@@ -380,30 +380,15 @@ export function RecordingPage() {
 
             {/* Recording Status */}
             <div className="bg-card border rounded-lg p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <h3 className="text-lg font-semibold">Recording Status</h3>
-                <InfoTooltip 
-                  content="Real-time information about your current recording including duration, signal quality, and frequency analysis."
-                  side="right"
-                />
-              </div>
+              <h3 className="text-lg font-semibold mb-4">Recording Status</h3>
               
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    <span className="text-sm font-medium">Duration</span>
-                    <InfoTooltip 
-                      content="Current recording length. Longer recordings may capture more frequency information, but each sound type has optimal durations."
-                      side="top"
-                    />
-                  </div>
+                  <span className="text-sm font-medium">Duration</span>
                   <div className="flex items-center space-x-2">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <span className="font-mono text-lg">
                       {formatDuration(recordingState.duration)}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      / {formatDuration(maxDuration)}
                     </span>
                   </div>
                 </div>
@@ -421,13 +406,7 @@ export function RecordingPage() {
                 {analysis && (
                   <>
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        <span className="text-sm font-medium">Signal Quality</span>
-                        <InfoTooltip 
-                          content="Overall recording quality based on signal strength, noise levels, and frequency content. Higher quality provides more accurate analysis."
-                          side="top"
-                        />
-                      </div>
+                      <span className="text-sm font-medium">Signal Quality</span>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         analysis.signalQuality === 'excellent' ? 'bg-green-100 text-green-800' :
                         analysis.signalQuality === 'good' ? 'bg-blue-100 text-blue-800' :
@@ -473,13 +452,7 @@ export function RecordingPage() {
 
             {/* Recording Controls */}
             <div className="bg-card border rounded-lg p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <h3 className="text-lg font-semibold">Controls</h3>
-                <InfoTooltip 
-                  content="Start, pause, resume, stop, and save your recordings. Make sure to select a space before starting."
-                  side="right"
-                />
-              </div>
+              <h3 className="text-lg font-semibold mb-4">Controls</h3>
               
               <RecordingControls
                 canRecord={canRecord && !!selectedSpaceId}
