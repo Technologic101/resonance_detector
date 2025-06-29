@@ -45,6 +45,7 @@ export class AudioRecorder {
   private testAudioSource: AudioBufferSourceNode | null = null
   private testAudioGain: GainNode | null = null
   private recordingTimeout: number | null = null
+  private currentSoundType: SoundType = SoundType.AMBIENT
   
   private config: Required<AudioRecorderConfig>
   private onStateChange: (state: RecordingState) => void
@@ -313,6 +314,15 @@ export class AudioRecorder {
     }
   }
 
+  private getMaxDurationForSoundType(soundType: SoundType): number {
+    // Set 20-second limit for ambient recordings
+    if (soundType === SoundType.AMBIENT) {
+      return 20
+    }
+    // Use default max duration for other sound types
+    return this.config.maxDuration
+  }
+
   async startRecording(soundType: SoundType = SoundType.AMBIENT): Promise<void> {
     if (!this.mediaRecorder || this.mediaRecorder.state !== 'inactive') {
       throw new Error('Recorder not ready')
@@ -322,7 +332,10 @@ export class AudioRecorder {
       await this.audioContext?.resume()
     }
 
-    console.log('AudioRecorder: Starting recording...')
+    console.log('AudioRecorder: Starting recording with sound type:', soundType)
+
+    // Store the current sound type for duration limits
+    this.currentSoundType = soundType
 
     this.chunks = []
     this.startTime = Date.now()
@@ -528,9 +541,10 @@ export class AudioRecorder {
           error: null,
         })
         
-        // Check max duration
-        if (this.getCurrentDuration() >= this.config.maxDuration) {
-          console.log('AudioRecorder: Max duration reached, stopping')
+        // Check max duration based on sound type
+        const maxDuration = this.getMaxDurationForSoundType(this.currentSoundType)
+        if (this.getCurrentDuration() >= maxDuration) {
+          console.log(`AudioRecorder: Max duration (${maxDuration}s) reached for ${this.currentSoundType}, stopping`)
           this.stopRecording().catch(console.error)
           return
         }

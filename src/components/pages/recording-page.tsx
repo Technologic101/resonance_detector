@@ -45,7 +45,7 @@ export function RecordingPage() {
     config: {
       sampleRate: 48000,
       channelCount: 1,
-      maxDuration: 300, // 5 minutes
+      maxDuration: 300, // 5 minutes default
       minDuration: 1, // 1 second
       enableEchoCancellation: false,
       enableNoiseSuppression: false,
@@ -63,6 +63,16 @@ export function RecordingPage() {
       setSelectedSpaceId(spaces[0].id)
     }
   }, [selectedSpaceId, spaces])
+
+  // Get max duration based on sound type
+  const getMaxDurationForSoundType = (soundType: SoundType): number => {
+    if (soundType === SoundType.AMBIENT) {
+      return 20 // 20 seconds for ambient recordings
+    }
+    return 300 // 5 minutes for other types
+  }
+
+  const maxDuration = getMaxDurationForSoundType(selectedSoundType)
 
   const handleStartRecording = async () => {
     if (!selectedSpaceId) {
@@ -325,7 +335,7 @@ export function RecordingPage() {
                   </select>
                   <p className="text-xs text-muted-foreground mt-1">
                     {selectedSoundType === SoundType.AMBIENT 
-                      ? 'Record ambient room sound without test signals'
+                      ? `Record ambient room sound (max ${maxDuration} seconds)`
                       : 'The selected test signal will play when recording starts'
                     }
                   </p>
@@ -345,8 +355,21 @@ export function RecordingPage() {
                     <span className="font-mono text-lg">
                       {formatDuration(recordingState.duration)}
                     </span>
+                    <span className="text-xs text-muted-foreground">
+                      / {formatDuration(maxDuration)}
+                    </span>
                   </div>
                 </div>
+
+                {/* Duration progress bar for ambient recordings */}
+                {selectedSoundType === SoundType.AMBIENT && (recordingState.isRecording || recordingState.isPaused) && (
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div 
+                      className="bg-primary h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${Math.min((recordingState.duration / maxDuration) * 100, 100)}%` }}
+                    />
+                  </div>
+                )}
 
                 {analysis && (
                   <>
