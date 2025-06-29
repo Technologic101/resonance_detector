@@ -6,6 +6,7 @@ import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { WaveformVisualizer } from '@/components/ui/waveform-visualizer'
 import { LevelMeter } from '@/components/ui/level-meter'
 import { RecordingControls } from '@/components/ui/recording-controls'
+import { InfoTooltip } from '@/components/ui/tooltip'
 import { Mic, ArrowLeft, AlertCircle, CheckCircle, Clock, Building2, Activity, Zap } from 'lucide-react'
 import { useNavigation } from '@/lib/context/navigation-context'
 import { useAuth } from '@/components/auth/auth-provider'
@@ -309,11 +310,23 @@ export function RecordingPage() {
           <div className="space-y-6">
             {/* Recording Settings */}
             <div className="bg-card border rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Recording Settings</h3>
+              <div className="flex items-center gap-2 mb-4">
+                <h3 className="text-lg font-semibold">Recording Settings</h3>
+                <InfoTooltip 
+                  content="Configure your recording parameters including the space to analyze and the type of test signal to use."
+                  side="right"
+                />
+              </div>
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Space</label>
+                  <div className="flex items-center gap-1 mb-2">
+                    <label className="block text-sm font-medium">Space</label>
+                    <InfoTooltip 
+                      content="Select the acoustic space you want to analyze. Each space can have multiple recordings for comparison."
+                      side="top"
+                    />
+                  </div>
                   <select
                     value={selectedSpaceId}
                     onChange={(e) => setSelectedSpaceId(e.target.value)}
@@ -336,7 +349,13 @@ export function RecordingPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Sound Type</label>
+                  <div className="flex items-center gap-1 mb-2">
+                    <label className="block text-sm font-medium">Sound Type</label>
+                    <InfoTooltip 
+                      content="Choose the type of test signal: Ambient (natural room sound), Sweeps (frequency analysis), or Noise (broadband testing). Each type reveals different acoustic properties."
+                      side="top"
+                    />
+                  </div>
                   <select
                     value={selectedSoundType}
                     onChange={(e) => setSelectedSoundType(e.target.value as SoundType)}
@@ -361,11 +380,23 @@ export function RecordingPage() {
 
             {/* Recording Status */}
             <div className="bg-card border rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Recording Status</h3>
+              <div className="flex items-center gap-2 mb-4">
+                <h3 className="text-lg font-semibold">Recording Status</h3>
+                <InfoTooltip 
+                  content="Real-time information about your current recording including duration, signal quality, and frequency analysis."
+                  side="right"
+                />
+              </div>
               
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Duration</span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium">Duration</span>
+                    <InfoTooltip 
+                      content="Current recording length. Longer recordings may capture more frequency information, but each sound type has optimal durations."
+                      side="top"
+                    />
+                  </div>
                   <div className="flex items-center space-x-2">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <span className="font-mono text-lg">
@@ -390,7 +421,13 @@ export function RecordingPage() {
                 {analysis && (
                   <>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Signal Quality</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm font-medium">Signal Quality</span>
+                        <InfoTooltip 
+                          content="Overall recording quality based on signal strength, noise levels, and frequency content. Higher quality provides more accurate analysis."
+                          side="top"
+                        />
+                      </div>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         analysis.signalQuality === 'excellent' ? 'bg-green-100 text-green-800' :
                         analysis.signalQuality === 'good' ? 'bg-blue-100 text-blue-800' :
@@ -402,14 +439,26 @@ export function RecordingPage() {
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Dominant Frequency</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm font-medium">Dominant Frequency</span>
+                        <InfoTooltip 
+                          content="The strongest frequency detected in real-time. This may indicate the primary resonance of the space."
+                          side="top"
+                        />
+                      </div>
                       <span className="font-mono">
                         {analysis.frequency.toFixed(1)} Hz
                       </span>
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">SNR</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm font-medium">SNR</span>
+                        <InfoTooltip 
+                          content="Signal-to-Noise Ratio in decibels. Higher values indicate cleaner recordings with less background interference."
+                          side="top"
+                        />
+                      </div>
                       <span className="font-mono">
                         {isFinite(analysis.frequencyAnalysis.snr) 
                           ? `${analysis.frequencyAnalysis.snr.toFixed(1)} dB`
@@ -424,7 +473,13 @@ export function RecordingPage() {
 
             {/* Recording Controls */}
             <div className="bg-card border rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Controls</h3>
+              <div className="flex items-center gap-2 mb-4">
+                <h3 className="text-lg font-semibold">Controls</h3>
+                <InfoTooltip 
+                  content="Start, pause, resume, stop, and save your recordings. Make sure to select a space before starting."
+                  side="right"
+                />
+              </div>
               
               <RecordingControls
                 canRecord={canRecord && !!selectedSpaceId}
@@ -487,35 +542,65 @@ export function RecordingPage() {
             {/* Real-time Analysis */}
             {analysis && (
               <div className="bg-card border rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-4">Real-time Analysis</h3>
+                <div className="flex items-center gap-2 mb-4">
+                  <h3 className="text-lg font-semibold">Real-time Analysis</h3>
+                  <InfoTooltip 
+                    content="Live analysis of your recording showing signal levels, frequency content, and advanced acoustic metrics as you record."
+                    side="right"
+                  />
+                </div>
                 
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-primary">
                       {(analysis.rms * 100).toFixed(1)}%
                     </div>
-                    <div className="text-sm text-muted-foreground">RMS Level</div>
+                    <div className="text-sm text-muted-foreground flex items-center justify-center gap-1">
+                      RMS Level
+                      <InfoTooltip 
+                        content="Root Mean Square - average signal level over time. Indicates overall recording volume."
+                        side="top"
+                      />
+                    </div>
                   </div>
                   
                   <div className="text-center">
                     <div className="text-2xl font-bold text-primary">
                       {(analysis.peak * 100).toFixed(1)}%
                     </div>
-                    <div className="text-sm text-muted-foreground">Peak Level</div>
+                    <div className="text-sm text-muted-foreground flex items-center justify-center gap-1">
+                      Peak Level
+                      <InfoTooltip 
+                        content="Highest signal level detected. Helps avoid clipping and ensures good recording quality."
+                        side="top"
+                      />
+                    </div>
                   </div>
                   
                   <div className="text-center">
                     <div className="text-xl font-bold text-primary">
                       {analysis.frequency.toFixed(1)} Hz
                     </div>
-                    <div className="text-sm text-muted-foreground">Dominant Freq</div>
+                    <div className="text-sm text-muted-foreground flex items-center justify-center gap-1">
+                      Dominant Freq
+                      <InfoTooltip 
+                        content="The strongest frequency currently being detected in the recording."
+                        side="top"
+                      />
+                    </div>
                   </div>
                   
                   <div className="text-center">
                     <div className="text-xl font-bold text-primary">
                       {analysis.frequencyAnalysis.peaks.length}
                     </div>
-                    <div className="text-sm text-muted-foreground">Peaks Found</div>
+                    <div className="text-sm text-muted-foreground flex items-center justify-center gap-1">
+                      Peaks Found
+                      <InfoTooltip 
+                        content="Number of significant frequency peaks detected. More peaks may indicate complex acoustic behavior."
+                        side="top"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -524,22 +609,51 @@ export function RecordingPage() {
                   <h4 className="font-medium mb-3 flex items-center">
                     <Activity className="h-4 w-4 mr-2" />
                     Advanced Metrics
+                    <InfoTooltip 
+                      content="Detailed acoustic analysis metrics for professional assessment of recording quality and acoustic properties."
+                      side="right"
+                      className="ml-2"
+                    />
                   </h4>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Spectral Centroid:</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-muted-foreground">Spectral Centroid:</span>
+                        <InfoTooltip 
+                          content="The 'center of mass' of the frequency spectrum. Higher values indicate brighter, more high-frequency content."
+                          side="top"
+                        />
+                      </div>
                       <span className="font-mono">{analysis.metrics.spectralCentroid.toFixed(0)} Hz</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Zero Crossings:</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-muted-foreground">Zero Crossings:</span>
+                        <InfoTooltip 
+                          content="Rate at which the signal crosses zero amplitude. Higher rates typically indicate more high-frequency content."
+                          side="top"
+                        />
+                      </div>
                       <span className="font-mono">{(analysis.metrics.zeroCrossingRate * 100).toFixed(1)}%</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">THD:</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-muted-foreground">THD:</span>
+                        <InfoTooltip 
+                          content="Total Harmonic Distortion - measures signal purity. Lower values indicate cleaner recordings."
+                          side="top"
+                        />
+                      </div>
                       <span className="font-mono">{analysis.frequencyAnalysis.thd.toFixed(2)}%</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Fundamental:</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-muted-foreground">Fundamental:</span>
+                        <InfoTooltip 
+                          content="The lowest, most prominent frequency in the signal. Often indicates the primary resonance."
+                          side="top"
+                        />
+                      </div>
                       <span className="font-mono">{analysis.frequencyAnalysis.fundamentalFrequency.toFixed(1)} Hz</span>
                     </div>
                   </div>

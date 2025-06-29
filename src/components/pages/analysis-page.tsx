@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { InfoTooltip } from '@/components/ui/tooltip'
 import { BarChart3, ArrowLeft, Filter, Download, Waves, Zap, Info } from 'lucide-react'
 import { useNavigation } from '@/lib/context/navigation-context'
 import { useSamples } from '@/lib/hooks/use-database'
@@ -217,7 +218,13 @@ export function AnalysisPage() {
                 {/* Sample Overview */}
                 <div className="bg-card border rounded-lg p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold">{getSoundTypeLabel(selectedSample.soundType)} Analysis</h2>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-xl font-semibold">{getSoundTypeLabel(selectedSample.soundType)} Analysis</h2>
+                      <InfoTooltip 
+                        content="This section shows basic information about your recording including duration, signal quality, and recording conditions."
+                        side="right"
+                      />
+                    </div>
                     <Button variant="outline" size="sm" onClick={handleExportData}>
                       <Download className="h-4 w-4 mr-2" />
                       Export Data
@@ -226,19 +233,43 @@ export function AnalysisPage() {
                   
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                     <div className="bg-background p-3 rounded-lg">
-                      <div className="text-sm text-muted-foreground">Duration</div>
+                      <div className="text-sm text-muted-foreground flex items-center gap-1">
+                        Duration
+                        <InfoTooltip 
+                          content="The length of your recording in seconds. Longer recordings may capture more frequency information."
+                          side="top"
+                        />
+                      </div>
                       <div className="font-semibold">{selectedSample.duration.toFixed(1)}s</div>
                     </div>
                     <div className="bg-background p-3 rounded-lg">
-                      <div className="text-sm text-muted-foreground">Signal Quality</div>
+                      <div className="text-sm text-muted-foreground flex items-center gap-1">
+                        Signal Quality
+                        <InfoTooltip 
+                          content="Overall quality of the recording based on signal strength, noise levels, and frequency content. Higher quality recordings provide more accurate analysis."
+                          side="top"
+                        />
+                      </div>
                       <div className="font-semibold">{selectedSample.signalQuality.toUpperCase()}</div>
                     </div>
                     <div className="bg-background p-3 rounded-lg">
-                      <div className="text-sm text-muted-foreground">Ambient Noise</div>
+                      <div className="text-sm text-muted-foreground flex items-center gap-1">
+                        Ambient Noise
+                        <InfoTooltip 
+                          content="Background noise level during recording. Lower values indicate cleaner recordings with less interference."
+                          side="top"
+                        />
+                      </div>
                       <div className="font-semibold">{selectedSample.ambientNoiseLevel.toFixed(1)}%</div>
                     </div>
                     <div className="bg-background p-3 rounded-lg">
-                      <div className="text-sm text-muted-foreground">Sample Rate</div>
+                      <div className="text-sm text-muted-foreground flex items-center gap-1">
+                        Sample Rate
+                        <InfoTooltip 
+                          content="How many audio samples per second were captured. Higher sample rates can capture higher frequencies (up to half the sample rate)."
+                          side="top"
+                        />
+                      </div>
                       <div className="font-semibold">{(selectedSample.sampleRate / 1000).toFixed(1)} kHz</div>
                     </div>
                   </div>
@@ -250,10 +281,16 @@ export function AnalysisPage() {
                 
                 {/* Frequency Peaks */}
                 <div className="bg-card border rounded-lg p-6">
-                  <h3 className="font-semibold mb-4 flex items-center">
-                    <Zap className="h-5 w-5 mr-2 text-primary" />
-                    Frequency Peaks
-                  </h3>
+                  <div className="flex items-center gap-2 mb-4">
+                    <h3 className="font-semibold flex items-center">
+                      <Zap className="h-5 w-5 mr-2 text-primary" />
+                      Frequency Peaks
+                    </h3>
+                    <InfoTooltip 
+                      content="Dominant frequencies detected in your recording. These peaks may indicate resonances, structural vibrations, or acoustic characteristics of the space."
+                      side="right"
+                    />
+                  </div>
                   
                   {selectedSample.peaks.length === 0 ? (
                     <div className="text-center py-6 text-muted-foreground">
@@ -265,10 +302,42 @@ export function AnalysisPage() {
                         <table className="w-full text-sm">
                           <thead>
                             <tr className="border-b">
-                              <th className="text-left py-2 font-medium">Frequency</th>
-                              <th className="text-left py-2 font-medium">Amplitude</th>
-                              <th className="text-left py-2 font-medium">Prominence</th>
-                              <th className="text-left py-2 font-medium">Classification</th>
+                              <th className="text-left py-2 font-medium">
+                                <div className="flex items-center gap-1">
+                                  Frequency
+                                  <InfoTooltip 
+                                    content="The specific frequency where a peak was detected, measured in Hertz (Hz) or kilohertz (kHz)."
+                                    side="top"
+                                  />
+                                </div>
+                              </th>
+                              <th className="text-left py-2 font-medium">
+                                <div className="flex items-center gap-1">
+                                  Amplitude
+                                  <InfoTooltip 
+                                    content="The strength or loudness of the frequency peak. Higher values indicate stronger resonances."
+                                    side="top"
+                                  />
+                                </div>
+                              </th>
+                              <th className="text-left py-2 font-medium">
+                                <div className="flex items-center gap-1">
+                                  Prominence
+                                  <InfoTooltip 
+                                    content="How much the peak stands out from surrounding frequencies. Higher prominence indicates more distinct resonances."
+                                    side="top"
+                                  />
+                                </div>
+                              </th>
+                              <th className="text-left py-2 font-medium">
+                                <div className="flex items-center gap-1">
+                                  Classification
+                                  <InfoTooltip 
+                                    content="Frequency range category: sub-bass (20-60Hz), bass (60-250Hz), mid (250-4kHz), high-mid (4-8kHz), or brilliance (8kHz+)."
+                                    side="top"
+                                  />
+                                </div>
+                              </th>
                             </tr>
                           </thead>
                           <tbody>
@@ -295,10 +364,16 @@ export function AnalysisPage() {
                 
                 {/* Frequency Visualization */}
                 <div className="bg-card border rounded-lg p-6">
-                  <h3 className="font-semibold mb-4 flex items-center">
-                    <Waves className="h-5 w-5 mr-2 text-primary" />
-                    Frequency Spectrum
-                  </h3>
+                  <div className="flex items-center gap-2 mb-4">
+                    <h3 className="font-semibold flex items-center">
+                      <Waves className="h-5 w-5 mr-2 text-primary" />
+                      Frequency Spectrum
+                    </h3>
+                    <InfoTooltip 
+                      content="Visual representation of frequency content in your recording. Taller bars indicate stronger frequencies. Colors represent different frequency ranges."
+                      side="right"
+                    />
+                  </div>
                   
                   <div className="relative h-64 bg-background rounded-lg border overflow-hidden">
                     {selectedSample.peaks.length === 0 ? (
@@ -355,10 +430,16 @@ export function AnalysisPage() {
                 
                 {/* Resonance Analysis */}
                 <div className="bg-card border rounded-lg p-6">
-                  <h3 className="font-semibold mb-4 flex items-center">
-                    <Info className="h-5 w-5 mr-2 text-primary" />
-                    Resonance Analysis
-                  </h3>
+                  <div className="flex items-center gap-2 mb-4">
+                    <h3 className="font-semibold flex items-center">
+                      <Info className="h-5 w-5 mr-2 text-primary" />
+                      Resonance Analysis
+                    </h3>
+                    <InfoTooltip 
+                      content="Advanced acoustic analysis including fundamental frequency, harmonics, and signal quality metrics. These help identify structural resonances and acoustic properties."
+                      side="right"
+                    />
+                  </div>
                   
                   <div className="space-y-4">
                     {selectedSample.spectralData && (
@@ -366,7 +447,13 @@ export function AnalysisPage() {
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                           {selectedSample.spectralData.fundamentalFrequency && (
                             <div className="bg-background p-3 rounded-lg">
-                              <div className="text-sm text-muted-foreground">Fundamental</div>
+                              <div className="text-sm text-muted-foreground flex items-center gap-1">
+                                Fundamental
+                                <InfoTooltip 
+                                  content="The lowest, most prominent frequency in the recording. Often indicates the primary resonance of the space or structure."
+                                  side="top"
+                                />
+                              </div>
                               <div className="font-semibold">
                                 {formatFrequency(selectedSample.spectralData.fundamentalFrequency)}
                               </div>
@@ -375,7 +462,13 @@ export function AnalysisPage() {
                           
                           {selectedSample.spectralData.snr !== undefined && (
                             <div className="bg-background p-3 rounded-lg">
-                              <div className="text-sm text-muted-foreground">Signal-to-Noise</div>
+                              <div className="text-sm text-muted-foreground flex items-center gap-1">
+                                Signal-to-Noise
+                                <InfoTooltip 
+                                  content="Ratio of signal strength to background noise in decibels (dB). Higher values indicate cleaner recordings with less interference."
+                                  side="top"
+                                />
+                              </div>
                               <div className="font-semibold">
                                 {selectedSample.spectralData.snr.toFixed(1)} dB
                               </div>
@@ -384,7 +477,13 @@ export function AnalysisPage() {
                           
                           {selectedSample.spectralData.thd !== undefined && (
                             <div className="bg-background p-3 rounded-lg">
-                              <div className="text-sm text-muted-foreground">THD</div>
+                              <div className="text-sm text-muted-foreground flex items-center gap-1">
+                                THD
+                                <InfoTooltip 
+                                  content="Total Harmonic Distortion - measures how much the signal deviates from a pure tone. Lower values indicate cleaner, more accurate recordings."
+                                  side="top"
+                                />
+                              </div>
                               <div className="font-semibold">
                                 {selectedSample.spectralData.thd.toFixed(2)}%
                               </div>
@@ -394,7 +493,13 @@ export function AnalysisPage() {
                         
                         {selectedSample.spectralData.harmonics && selectedSample.spectralData.harmonics.length > 0 && (
                           <div>
-                            <h4 className="text-sm font-medium mb-2">Harmonic Frequencies</h4>
+                            <div className="flex items-center gap-1 mb-2">
+                              <h4 className="text-sm font-medium">Harmonic Frequencies</h4>
+                              <InfoTooltip 
+                                content="Frequencies that are mathematical multiples of the fundamental frequency. These indicate resonant modes and acoustic characteristics of the space."
+                                side="right"
+                              />
+                            </div>
                             <div className="flex flex-wrap gap-2">
                               {selectedSample.spectralData.harmonics.map((freq, index) => (
                                 <div key={index} className="px-2 py-1 bg-primary/10 rounded-full text-xs">
@@ -406,7 +511,13 @@ export function AnalysisPage() {
                         )}
                         
                         <div className="border-t pt-4 mt-4">
-                          <h4 className="text-sm font-medium mb-2">Interpretation</h4>
+                          <div className="flex items-center gap-1 mb-2">
+                            <h4 className="text-sm font-medium">Interpretation</h4>
+                            <InfoTooltip 
+                              content="AI-generated analysis of your recording results, providing insights into potential acoustic issues, resonances, and recommendations for further analysis."
+                              side="right"
+                            />
+                          </div>
                           <p className="text-sm text-muted-foreground">
                             {getResonanceInterpretation(selectedSample)}
                           </p>
