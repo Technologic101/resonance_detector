@@ -49,6 +49,7 @@ export class AudioRecorder {
   private currentAudioDuration: number = 0 // Duration of the loaded audio file
   private stopRecordingResolver: ((blob: Blob) => void) | null = null
   private stopRecordingRejecter: ((error: Error) => void) | null = null
+  private audioEndedHandler: (() => void) | null = null
   
   private config: Required<AudioRecorderConfig>
   private onStateChange: (state: RecordingState) => void
@@ -341,6 +342,15 @@ export class AudioRecorder {
       // Set volume (lower for test signals)
       this.testAudioGain.gain.setValueAtTime(0.3, this.audioContext.currentTime)
 
+      // Set up the onended event to automatically stop recording
+      this.testAudioSource.onended = () => {
+        console.log('AudioRecorder: Test audio ended, auto-stopping recording')
+        // Trigger the same function as the stop button
+        if (this.audioEndedHandler) {
+          this.audioEndedHandler()
+        }
+      }
+
       // Play the audio
       this.testAudioSource.start(this.audioContext.currentTime)
 
@@ -356,6 +366,7 @@ export class AudioRecorder {
   private stopTestAudio(): void {
     if (this.testAudioSource) {
       try {
+        this.testAudioSource.onended = null // Clear the event handler
         this.testAudioSource.stop()
         this.testAudioSource.disconnect()
       } catch (error) {
@@ -396,6 +407,11 @@ export class AudioRecorder {
   // Get the max duration for the current sound type
   getMaxDuration(): number {
     return this.getMaxDurationForSoundType(this.currentSoundType)
+  }
+
+  // Set the audio ended handler (called from the recording page)
+  setAudioEndedHandler(handler: () => void): void {
+    this.audioEndedHandler = handler
   }
 
   async startRecording(soundType: SoundType = SoundType.AMBIENT): Promise<void> {
@@ -717,5 +733,6 @@ export class AudioRecorder {
     this.analyzer = null
     this.microphone = null
     this.stream = null
+    this.audioEndedHandler = null
   }
 }

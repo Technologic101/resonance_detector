@@ -65,6 +65,15 @@ export function RecordingPage() {
     }
   }, [selectedSpaceId, spaces])
 
+  // Set up the audio ended handler to automatically stop recording when WAV files finish
+  useEffect(() => {
+    // Get the recorder instance and set the audio ended handler
+    const recorderInstance = (window as any).audioRecorderInstance
+    if (recorderInstance && typeof recorderInstance.setAudioEndedHandler === 'function') {
+      recorderInstance.setAudioEndedHandler(handleStopRecording)
+    }
+  }, [])
+
   // Get max duration based on sound type and actual audio file duration
   const getMaxDurationForSoundType = (soundType: SoundType): number => {
     if (soundType === SoundType.AMBIENT) {

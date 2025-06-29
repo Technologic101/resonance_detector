@@ -82,14 +82,14 @@ export function RecordingControls({
           </div>
         )}
 
-        {/* Stop Button */}
+        {/* Stop Button - Made RED */}
         {canStop && (
           <div className="text-center">
             <Button
               size="lg"
               onClick={onStop}
               disabled={disabled}
-              className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-full w-16 h-16 shadow-xl hover:scale-105 transition-all duration-300 border-0"
+              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-full w-16 h-16 shadow-xl hover:scale-105 transition-all duration-300 border-0"
             >
               <Square className="h-6 w-6" />
             </Button>
