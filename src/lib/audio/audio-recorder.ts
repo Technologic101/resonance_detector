@@ -337,6 +337,16 @@ export class AudioRecorder {
     return this.currentAudioDuration
   }
 
+  // Get the current sound type
+  getCurrentSoundType(): SoundType {
+    return this.currentSoundType
+  }
+
+  // Get the max duration for the current sound type
+  getMaxDuration(): number {
+    return this.getMaxDurationForSoundType(this.currentSoundType)
+  }
+
   async startRecording(soundType: SoundType = SoundType.AMBIENT): Promise<void> {
     if (!this.mediaRecorder || this.mediaRecorder.state !== 'inactive') {
       throw new Error('Recorder not ready')

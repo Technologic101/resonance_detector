@@ -64,7 +64,7 @@ export function RecordingPage() {
     }
   }, [selectedSpaceId, spaces])
 
-  // Get max duration based on sound type
+  // Get max duration based on sound type and actual audio file duration
   const getMaxDurationForSoundType = (soundType: SoundType): number => {
     if (soundType === SoundType.AMBIENT) {
       return 20 // 20 seconds for ambient recordings
@@ -78,9 +78,12 @@ export function RecordingPage() {
       return 20
     }
     // For WAV files, get the actual audio duration from the recorder
-    const audioDuration = (window as any).audioRecorderInstance?.getCurrentAudioDuration?.() || 0
-    if (audioDuration > 0) {
-      return audioDuration + 0.5 // Add small buffer
+    const recorderInstance = (window as any).audioRecorderInstance
+    if (recorderInstance && typeof recorderInstance.getCurrentAudioDuration === 'function') {
+      const audioDuration = recorderInstance.getCurrentAudioDuration()
+      if (audioDuration > 0) {
+        return audioDuration + 0.5 // Add small buffer
+      }
     }
     return getMaxDurationForSoundType(selectedSoundType)
   }
@@ -374,8 +377,8 @@ export function RecordingPage() {
                   </div>
                 </div>
 
-                {/* Duration progress bar for ambient recordings or WAV files */}
-                {(selectedSoundType === SoundType.AMBIENT || selectedSoundType !== SoundType.AMBIENT) && (recordingState.isRecording || recordingState.isPaused) && (
+                {/* Duration progress bar for all recording types */}
+                {(recordingState.isRecording || recordingState.isPaused) && (
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                     <div 
                       className="bg-primary h-2 rounded-full transition-all duration-300"
