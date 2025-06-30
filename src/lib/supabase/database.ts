@@ -13,7 +13,6 @@ class SupabaseDatabase {
   async getCurrentUser() {
     try {
       const { data: { user }, error } = await supabase.auth.getUser()
-      if (error) return null
       return user
     } catch (error) {
       console.error('Failed to get current user:', error)
