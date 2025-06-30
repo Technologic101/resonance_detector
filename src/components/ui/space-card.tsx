@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { MoreVertical, Edit, Trash2, Mic, Eye } from 'lucide-react'
 import { Space } from '@/lib/types'
-import { database } from '@/lib/database'
+import { database } from '@/lib/supabase/database'
 import { useNavigation } from '@/lib/context/navigation-context'
 import { getSpaceTypeLabel, formatDate } from '@/lib/utils/space-utils'
 
