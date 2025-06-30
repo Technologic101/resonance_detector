@@ -23,8 +23,8 @@ export const createClient = () => {
   })
 }
 
-// Only create the default client if we have the required variables
-export const supabase = supabaseUrl && supabaseAnonKey ? createClient() : null
+// Always create the client - let createClient() handle any missing variables
+export const supabase = createClient()
 
 // Export environment info for debugging
 export const getEnvironmentInfo = () => ({
