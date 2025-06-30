@@ -12,7 +12,6 @@ A web application for detecting and analyzing building resonance frequencies wit
 - **Frequency Analysis**: Analyze frequency content and identify resonance peaks
 - **Space Management**: Create and manage different acoustic spaces
 - **Cross-device Sync**: Access your data from any device
-- **Environment Separation**: Separate development and production databases
 
 ## Technologies Used
 
@@ -28,7 +27,7 @@ A web application for detecting and analyzing building resonance frequencies wit
 ### Prerequisites
 
 1. Node.js 18+ installed
-2. Two Supabase projects (development and production)
+2. A Supabase project
 
 ### Setup
 
@@ -39,44 +38,23 @@ A web application for detecting and analyzing building resonance frequencies wit
    npm install
    ```
 
-2. **Set up Supabase Projects**:
-   
-   **Development Database:**
-   - Create a new project at [supabase.com](https://supabase.com) for development
+2. **Set up Supabase Project**:
+   - Create a new project at [supabase.com](https://supabase.com)
    - Go to Settings > API to get your project URL and anon key
-   - Run the database migrations in your development project
-   
-   **Production Database:**
-   - Create a separate project at [supabase.com](https://supabase.com) for production
-   - Go to Settings > API to get your project URL and anon key
-   - Run the database migrations in your production project
+   - Run the database migrations in your project
 
 3. **Configure Environment Variables**:
    Copy `.env.local.example` to `.env.local` and fill in your Supabase credentials:
    
    ```env
-   # Production Database (for live deployment)
-   NEXT_PUBLIC_SUPABASE_URL=your_production_supabase_project_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_production_supabase_anon_key
-   SUPABASE_SERVICE_ROLE_KEY=your_production_supabase_service_role_key
-
-   # Development Database (for local development)
-   NEXT_PUBLIC_SUPABASE_DEV_URL=your_development_supabase_project_url
-   NEXT_PUBLIC_SUPABASE_DEV_ANON_KEY=your_development_supabase_anon_key
-   SUPABASE_DEV_SERVICE_ROLE_KEY=your_development_supabase_service_role_key
-
-   # Environment Configuration
-   NODE_ENV=development
-   NEXT_PUBLIC_APP_ENV=development
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
    ```
 
-4. **Run database migrations** (for both projects):
+4. **Run database migrations**:
    ```bash
-   # For development database
-   npx supabase db push --project-ref your_dev_project_ref
-   
-   # For production database  
-   npx supabase db push --project-ref your_prod_project_ref
+   npx supabase db push
    ```
 
 5. **Start the development server**:
@@ -86,21 +64,6 @@ A web application for detecting and analyzing building resonance frequencies wit
 
 6. **Open the application**:
    Navigate to [http://localhost:3000](http://localhost:3000)
-
-### Environment Configuration
-
-The app automatically detects the environment and uses the appropriate database:
-
-- **Development Mode** (`NODE_ENV=development` or `NEXT_PUBLIC_APP_ENV=development`):
-  - Uses `NEXT_PUBLIC_SUPABASE_DEV_URL` and `NEXT_PUBLIC_SUPABASE_DEV_ANON_KEY`
-  - Falls back to production variables if dev variables are not set
-  - Shows environment indicator in the UI
-  - All test recordings and data go to the development database
-
-- **Production Mode**:
-  - Uses `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-  - No environment indicator shown
-  - All user data goes to the production database
 
 ### Database Schema
 
@@ -152,7 +115,6 @@ All tables have Row Level Security (RLS) enabled to ensure users can only access
 - Row Level Security ensures data privacy
 - Secure file storage with signed URLs
 - Authentication required for all operations
-- Environment separation for development safety
 
 ## Development
 
@@ -168,37 +130,10 @@ npm run build
 
 ### Database Migrations
 ```bash
-# Development
-npx supabase db push --project-ref your_dev_project_ref
-
-# Production
-npx supabase db push --project-ref your_prod_project_ref
-```
-
-### Environment Switching
-
-To switch between environments, update your `.env.local`:
-
-```env
-# For development
-NEXT_PUBLIC_APP_ENV=development
-
-# For production testing
-NEXT_PUBLIC_APP_ENV=production
+npx supabase db push
 ```
 
 ## Deployment
-
-### Development Deployment
-- Uses development database
-- Safe for testing and experimentation
-- Environment indicator visible
-
-### Production Deployment
-- Uses production database
-- Real user data
-- No environment indicator
-- Set `NEXT_PUBLIC_APP_ENV=production` in deployment environment
 
 The application can be deployed to any platform that supports Next.js:
 
@@ -209,19 +144,11 @@ The application can be deployed to any platform that supports Next.js:
 
 Make sure to set the appropriate environment variables in your deployment platform.
 
-## Best Practices
-
-1. **Always use development database for testing**
-2. **Never test with production data**
-3. **Run migrations on both databases**
-4. **Keep environment variables secure**
-5. **Test thoroughly in development before production deployment**
-
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes using the development database
+3. Make your changes
 4. Add tests if applicable
 5. Submit a pull request
 
