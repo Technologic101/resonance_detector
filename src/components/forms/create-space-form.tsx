@@ -9,6 +9,7 @@ import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { ProcessingOverlay } from '@/components/ui/processing-overlay'
 import { ArrowLeft, Building2 } from 'lucide-react'
 import { useNavigation } from '@/lib/context/navigation-context'
+import { useAuth } from '@/components/auth/auth-provider'
 import { database } from '@/lib/supabase/database'
 import { SpaceType } from '@/lib/types'
 import { getSpaceTypeLabel } from '@/lib/utils/space-utils'
@@ -27,6 +28,7 @@ interface CreateSpaceFormProps {
 
 export function CreateSpaceForm({ onSuccess }: CreateSpaceFormProps) {
   const { setCurrentPage, navigateToSpace } = useNavigation()
+  const { user } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const {
@@ -47,10 +49,15 @@ export function CreateSpaceForm({ onSuccess }: CreateSpaceFormProps) {
   const selectedType = watch('type')
 
   const onSubmit = async (data: CreateSpaceFormData) => {
+    if (!user) {
+      alert('You must be logged in to create a space')
+      return
+    }
+
     setIsSubmitting(true)
     try {
       // Create the space using Supabase
-      const newSpace = await database.createSpace(data)
+      const newSpace = await database.createSpace(user, data)
       
       // Call success callback to refresh spaces list
       onSuccess()

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { MoreVertical, Edit, Trash2, Mic, Eye } from 'lucide-react'
 import { Space } from '@/lib/types'
 import { database } from '@/lib/supabase/database'
+import { useAuth } from '@/components/auth/auth-provider'
 import { useNavigation } from '@/lib/context/navigation-context'
 import { getSpaceTypeLabel, formatDate } from '@/lib/utils/space-utils'
 
@@ -14,11 +15,17 @@ interface SpaceCardProps {
 }
 
 export function SpaceCard({ space, onUpdate }: SpaceCardProps) {
+  const { user } = useAuth()
   const { navigateToRecording, navigateToSpace } = useNavigation()
   const [showMenu, setShowMenu] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
   const handleDelete = async () => {
+    if (!user) {
+      alert('You must be logged in to delete a space')
+      return
+    }
+
     const confirmMessage = space.sampleIds.length > 0 
       ? `Are you sure you want to delete "${space.name}"? This will also delete ${space.sampleIds.length} associated recording(s).`
       : `Are you sure you want to delete "${space.name}"?`
@@ -32,7 +39,7 @@ export function SpaceCard({ space, onUpdate }: SpaceCardProps) {
     
     try {
       console.log(`Attempting to delete space: ${space.id}`)
-      await database.deleteSpace(space.id)
+      await database.deleteSpace(user, space.id)
       console.log(`Space ${space.id} deleted successfully`)
       
       // Refresh the spaces list

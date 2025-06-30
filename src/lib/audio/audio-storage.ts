@@ -67,7 +67,7 @@ export class AudioStorage {
       console.log('AudioStorage: File uploaded to path:', filePath)
 
       // Update sample with file path
-      await database.updateSample(sample.id, {
+      await database.updateSample(user, sample.id, {
         audioFilePath: filePath,
       })
 
@@ -80,9 +80,9 @@ export class AudioStorage {
     }
   }
 
-  static async getAudioFile(sampleId: string): Promise<Blob | null> {
+  static async getAudioFile(user: User, sampleId: string): Promise<Blob | null> {
     try {
-      const sample = await database.getSample(sampleId)
+      const sample = await database.getSample(user, sampleId)
       if (!sample || !sample.audioFilePath) return null
 
       const url = await database.getAudioFileUrl(sample.audioFilePath)
@@ -97,9 +97,9 @@ export class AudioStorage {
     }
   }
 
-  static async deleteAudioFile(sampleId: string): Promise<void> {
+  static async deleteAudioFile(user: User, sampleId: string): Promise<void> {
     try {
-      const sample = await database.getSample(sampleId)
+      const sample = await database.getSample(user, sampleId)
       if (!sample) return
 
       // Delete from storage if file path exists
@@ -108,7 +108,7 @@ export class AudioStorage {
       }
 
       // Delete sample record
-      await database.deleteSample(sampleId)
+      await database.deleteSample(user, sampleId)
     } catch (error) {
       console.error('Failed to delete audio file:', error)
     }

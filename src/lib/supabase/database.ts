@@ -10,16 +10,6 @@ type ProfileRow = Tables['profiles']['Row']
 
 class SupabaseDatabase {
   // Auth helpers
-  async getCurrentUser() {
-    try {
-      const { data: { user }, error } = await supabase.auth.getUser()
-      return user
-    } catch (error) {
-      console.error('Failed to get current user:', error)
-      return null
-    }
-  }
-
   async signUp(email: string, password: string, fullName?: string) {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -72,10 +62,7 @@ class SupabaseDatabase {
   }
 
   // Space operations
-  async createSpace(data: CreateSpaceData): Promise<Space> {
-    const user = await this.getCurrentUser()
-    if (!user) throw new Error('User not authenticated')
-
+  async createSpace(user: User, data: CreateSpaceData): Promise<Space> {
     const { data: spaceData, error } = await supabase
       .from('spaces')
       .insert({
@@ -94,10 +81,7 @@ class SupabaseDatabase {
     return this.mapSpaceFromRow(spaceData)
   }
 
-  async getSpace(id: string): Promise<Space | null> {
-    const user = await this.getCurrentUser()
-    if (!user) throw new Error('User not authenticated')
-
+  async getSpace(user: User, id: string): Promise<Space | null> {
     const { data, error } = await supabase
       .from('spaces')
       .select('*')
@@ -109,10 +93,7 @@ class SupabaseDatabase {
     return data ? this.mapSpaceFromRow(data) : null
   }
 
-  async getAllSpaces(): Promise<Space[]> {
-    const user = await this.getCurrentUser()
-    if (!user) throw new Error('User not authenticated')
-
+  async getAllSpaces(user: User): Promise<Space[]> {
     const { data, error } = await supabase
       .from('spaces')
       .select('*')
@@ -123,10 +104,7 @@ class SupabaseDatabase {
     return data.map(this.mapSpaceFromRow)
   }
 
-  async updateSpace(id: string, updates: Partial<Space>): Promise<Space> {
-    const user = await this.getCurrentUser()
-    if (!user) throw new Error('User not authenticated')
-
+  async updateSpace(user: User, id: string, updates: Partial<Space>): Promise<Space> {
     const { data, error } = await supabase
       .from('spaces')
       .update({
@@ -147,10 +125,7 @@ class SupabaseDatabase {
     return this.mapSpaceFromRow(data)
   }
 
-  async deleteSpace(id: string): Promise<void> {
-    const user = await this.getCurrentUser()
-    if (!user) throw new Error('User not authenticated')
-
+  async deleteSpace(user: User, id: string): Promise<void> {
     // Delete associated samples first
     const { error: samplesError } = await supabase
       .from('samples')
@@ -170,10 +145,7 @@ class SupabaseDatabase {
     if (error) throw error
   }
 
-  async getSpaceCount(): Promise<number> {
-    const user = await this.getCurrentUser()
-    if (!user) return 0
-
+  async getSpaceCount(user: User): Promise<number> {
     const { count, error } = await supabase
       .from('spaces')
       .select('*', { count: 'exact', head: true })
@@ -207,10 +179,7 @@ class SupabaseDatabase {
     return this.mapSampleFromRow(sampleData)
   }
 
-  async getSample(id: string): Promise<Sample | null> {
-    const user = await this.getCurrentUser()
-    if (!user) throw new Error('User not authenticated')
-
+  async getSample(user: User, id: string): Promise<Sample | null> {
     const { data, error } = await supabase
       .from('samples')
       .select('*')
@@ -222,10 +191,7 @@ class SupabaseDatabase {
     return data ? this.mapSampleFromRow(data) : null
   }
 
-  async getSamplesForSpace(spaceId: string): Promise<Sample[]> {
-    const user = await this.getCurrentUser()
-    if (!user) throw new Error('User not authenticated')
-
+  async getSamplesForSpace(user: User, spaceId: string): Promise<Sample[]> {
     const { data, error } = await supabase
       .from('samples')
       .select('*')
@@ -237,10 +203,7 @@ class SupabaseDatabase {
     return data.map(this.mapSampleFromRow)
   }
 
-  async getAllSamples(): Promise<Sample[]> {
-    const user = await this.getCurrentUser()
-    if (!user) throw new Error('User not authenticated')
-
+  async getAllSamples(user: User): Promise<Sample[]> {
     const { data, error } = await supabase
       .from('samples')
       .select('*')
@@ -251,10 +214,7 @@ class SupabaseDatabase {
     return data.map(this.mapSampleFromRow)
   }
 
-  async getRecentSamples(limit: number = 5): Promise<Sample[]> {
-    const user = await this.getCurrentUser()
-    if (!user) throw new Error('User not authenticated')
-
+  async getRecentSamples(user: User, limit: number = 5): Promise<Sample[]> {
     const { data, error } = await supabase
       .from('samples')
       .select('*')
@@ -266,10 +226,7 @@ class SupabaseDatabase {
     return data.map(this.mapSampleFromRow)
   }
 
-  async updateSample(id: string, updates: Partial<Sample>): Promise<Sample> {
-    const user = await this.getCurrentUser()
-    if (!user) throw new Error('User not authenticated')
-
+  async updateSample(user: User, id: string, updates: Partial<Sample>): Promise<Sample> {
     const { data, error } = await supabase
       .from('samples')
       .update({
@@ -291,10 +248,7 @@ class SupabaseDatabase {
     return this.mapSampleFromRow(data)
   }
 
-  async deleteSample(id: string): Promise<void> {
-    const user = await this.getCurrentUser()
-    if (!user) throw new Error('User not authenticated')
-
+  async deleteSample(user: User, id: string): Promise<void> {
     const { error } = await supabase
       .from('samples')
       .delete()
@@ -304,10 +258,7 @@ class SupabaseDatabase {
     if (error) throw error
   }
 
-  async getSampleCount(): Promise<number> {
-    const user = await this.getCurrentUser()
-    if (!user) return 0
-
+  async getSampleCount(user: User): Promise<number> {
     const { count, error } = await supabase
       .from('samples')
       .select('*', { count: 'exact', head: true })

@@ -4,16 +4,23 @@ import { Space, Sample } from '@/lib/types'
 import { useAuth } from '@/components/auth/auth-provider'
 
 export function useSpaces() {
+  const { user } = useAuth()
   const [spaces, setSpaces] = useState<Space[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const loadSpaces = useCallback(async () => {
+    if (!user) {
+      setSpaces([])
+      setLoading(false)
+      return
+    }
+
     try {
       setLoading(true)
       setError(null)
       
-      const allSpaces = await database.getAllSpaces()
+      const allSpaces = await database.getAllSpaces(user)
       setSpaces(allSpaces) // Already sorted by updated_at DESC from Supabase
     } catch (err) {
       console.error('Error loading spaces:', err)
@@ -21,7 +28,7 @@ export function useSpaces() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [user])
 
   useEffect(() => {
     loadSpaces()
@@ -36,12 +43,13 @@ export function useSpaces() {
 }
 
 export function useSpace(id: string | null) {
+  const { user } = useAuth()
   const [space, setSpace] = useState<Space | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const loadSpace = useCallback(async () => {
-    if (!id) {
+    if (!id || !user) {
       setSpace(null)
       setLoading(false)
       return
@@ -51,7 +59,7 @@ export function useSpace(id: string | null) {
       setLoading(true)
       setError(null)
       
-      const foundSpace = await database.getSpace(id)
+      const foundSpace = await database.getSpace(user, id)
       setSpace(foundSpace || null)
     } catch (err) {
       console.error('Error loading space:', err)
@@ -59,7 +67,7 @@ export function useSpace(id: string | null) {
     } finally {
       setLoading(false)
     }
-  }, [id])
+  }, [id, user])
 
   useEffect(() => {
     loadSpace()
@@ -74,18 +82,25 @@ export function useSpace(id: string | null) {
 }
 
 export function useSamples(spaceId?: string) {
+  const { user } = useAuth()
   const [samples, setSamples] = useState<Sample[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const loadSamples = useCallback(async () => {
+    if (!user) {
+      setSamples([])
+      setLoading(false)
+      return
+    }
+
     try {
       setLoading(true)
       setError(null)
       
       const allSamples = spaceId 
-        ? await database.getSamplesForSpace(spaceId)
-        : await database.getAllSamples()
+        ? await database.getSamplesForSpace(user, spaceId)
+        : await database.getAllSamples(user)
       setSamples(allSamples) // Already sorted by recorded_at DESC from Supabase
     } catch (err) {
       console.error('Error loading samples:', err)
@@ -93,7 +108,7 @@ export function useSamples(spaceId?: string) {
     } finally {
       setLoading(false)
     }
-  }, [spaceId])
+  }, [spaceId, user])
 
   useEffect(() => {
     loadSamples()
@@ -128,8 +143,8 @@ export function useStats() {
       setError(null)
       
       const [spaceCount, sampleCount] = await Promise.all([
-        database.getSpaceCount(),
-        database.getSampleCount(),
+        database.getSpaceCount(user),
+        database.getSampleCount(user),
       ])
       
       setStats({ spaceCount, sampleCount })
@@ -172,7 +187,7 @@ export function useRecentSamples(limit: number = 5) {
       setLoading(true)
       setError(null)
       
-      const recentSamples = await database.getRecentSamples(limit)
+      const recentSamples = await database.getRecentSamples(user, limit)
       setSamples(recentSamples)
     } catch (err) {
       console.error('Error loading recent samples:', err)
