@@ -55,10 +55,23 @@ export function CreateSpaceForm({ onSuccess }: CreateSpaceFormProps) {
       return
     }
 
+    console.log('Creating space with data:', data)
+    console.log('User ID:', user.id)
+
     setIsSubmitting(true)
     try {
+      // Verify user is authenticated before making the request
+      const { data: { session } } = await database.supabase.auth.getSession()
+      if (!session) {
+        throw new Error('No active session found. Please sign in again.')
+      }
+      
+      console.log('Session verified, access token present:', !!session.access_token)
+      
       // Create the space using the database instance from context
       const newSpace = await database.createSpace(user, data)
+      
+      console.log('Space created successfully:', newSpace.id)
       
       // Call success callback to refresh spaces list
       onSuccess()
@@ -67,7 +80,13 @@ export function CreateSpaceForm({ onSuccess }: CreateSpaceFormProps) {
       navigateToSpace(newSpace.id)
     } catch (error) {
       console.error('Failed to create space:', error)
-      alert('Failed to create space. Please try again.')
+      
+      // Check if it's an authentication error
+      if (error instanceof Error && error.message.includes('row-level security')) {
+        alert('Authentication error. Please sign out and sign in again.')
+      } else {
+        alert(`Failed to create space: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      }
     } finally {
       setIsSubmitting(false)
     }

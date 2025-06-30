@@ -9,7 +9,11 @@ type SampleRow = Tables['samples']['Row']
 type ProfileRow = Tables['profiles']['Row']
 
 class SupabaseDatabase {
-  constructor(private supabase: SupabaseClient<Database>) {}
+  public supabase: SupabaseClient<Database> // Make supabase public for session access
+
+  constructor(supabase: SupabaseClient<Database>) {
+    this.supabase = supabase
+  }
 
   // Auth helpers
   async signUp(email: string, password: string, fullName?: string) {
@@ -65,6 +69,17 @@ class SupabaseDatabase {
 
   // Space operations
   async createSpace(user: User, data: CreateSpaceData): Promise<Space> {
+    console.log('Database: Creating space for user:', user.id)
+    console.log('Database: Space data:', data)
+
+    // Verify we have a session before making the request
+    const { data: { session } } = await this.supabase.auth.getSession()
+    if (!session) {
+      throw new Error('No active session found')
+    }
+
+    console.log('Database: Session verified, making request...')
+
     const { data: spaceData, error } = await this.supabase
       .from('spaces')
       .insert({
@@ -79,7 +94,12 @@ class SupabaseDatabase {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('Database: Error creating space:', error)
+      throw error
+    }
+
+    console.log('Database: Space created successfully:', spaceData.id)
     return this.mapSpaceFromRow(spaceData)
   }
 

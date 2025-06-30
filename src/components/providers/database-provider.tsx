@@ -3,8 +3,6 @@
 import React, { createContext, useContext, useMemo } from 'react'
 import { getDatabase } from '@/lib/supabase/database'
 import { useAuth } from '@/components/auth/auth-provider'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import type { Database } from '@/lib/supabase/types'
 
 // Define the database instance type
 type DatabaseInstance = ReturnType<typeof getDatabase>
@@ -21,6 +19,7 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
   // Create database instance and recreate it when user authentication changes
   // This ensures the database instance uses an authenticated supabase client
   const database = useMemo(() => {
+    console.log('Creating database instance, user:', user ? user.id : 'none')
     return getDatabase(supabase)
   }, [supabase, user])
 

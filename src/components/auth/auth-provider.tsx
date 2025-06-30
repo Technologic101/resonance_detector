@@ -24,9 +24,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setUser(session?.user ?? null)
-      setLoading(false)
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+        if (error) {
+          console.error('Error getting initial session:', error)
+        } else {
+          console.log('Initial session:', session ? 'Found' : 'None')
+          setUser(session?.user ?? null)
+        }
+      } catch (error) {
+        console.error('Failed to get initial session:', error)
+      } finally {
+        setLoading(false)
+      }
     }
 
     getInitialSession()
@@ -34,8 +44,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state change:', event, session ? 'Session exists' : 'No session')
+        
+        // Update user state
         setUser(session?.user ?? null)
         setLoading(false)
+        
+        // Log the current session for debugging
+        if (session) {
+          console.log('User authenticated:', session.user.id)
+          console.log('Access token present:', !!session.access_token)
+        } else {
+          console.log('User signed out or no session')
+        }
       }
     )
 
@@ -43,6 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase])
 
   const signUp = async (email: string, password: string, fullName?: string) => {
+    console.log('Attempting to sign up user:', email)
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -52,20 +74,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
       },
     })
-    if (error) throw error
+    if (error) {
+      console.error('Sign up error:', error)
+      throw error
+    }
+    console.log('Sign up successful')
   }
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    console.log('Attempting to sign in user:', email)
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
-    if (error) throw error
+    if (error) {
+      console.error('Sign in error:', error)
+      throw error
+    }
+    console.log('Sign in successful:', data.user?.id)
   }
 
   const signOut = async () => {
+    console.log('Attempting to sign out')
     const { error } = await supabase.auth.signOut()
-    if (error) throw error
+    if (error) {
+      console.error('Sign out error:', error)
+      throw error
+    }
+    console.log('Sign out successful')
   }
 
   return (
