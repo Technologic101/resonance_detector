@@ -10,7 +10,7 @@ import { ProcessingOverlay } from '@/components/ui/processing-overlay'
 import { ArrowLeft, Building2 } from 'lucide-react'
 import { useNavigation } from '@/lib/context/navigation-context'
 import { useAuth } from '@/components/auth/auth-provider'
-import { database } from '@/lib/supabase/database'
+import { getDatabase } from '@/lib/supabase/database'
 import { SpaceType } from '@/lib/types'
 import { getSpaceTypeLabel } from '@/lib/utils/space-utils'
 
@@ -28,7 +28,7 @@ interface CreateSpaceFormProps {
 
 export function CreateSpaceForm({ onSuccess }: CreateSpaceFormProps) {
   const { setCurrentPage, navigateToSpace } = useNavigation()
-  const { user } = useAuth()
+  const { user, supabase } = useAuth()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const {
@@ -56,6 +56,9 @@ export function CreateSpaceForm({ onSuccess }: CreateSpaceFormProps) {
 
     setIsSubmitting(true)
     try {
+      // Create the database instance with the Supabase client
+      const database = getDatabase(supabase)
+      
       // Create the space using Supabase
       const newSpace = await database.createSpace(user, data)
       
