@@ -16,13 +16,13 @@ interface DatabaseContextType {
 const DatabaseContext = createContext<DatabaseContextType | undefined>(undefined)
 
 export function DatabaseProvider({ children }: { children: React.ReactNode }) {
-  const { supabase } = useAuth()
+  const { supabase, user } = useAuth()
 
-  // Create database instance only once using useMemo
-  // This ensures the same instance is reused unless supabase client changes
+  // Create database instance and recreate it when user authentication changes
+  // This ensures the database instance uses an authenticated supabase client
   const database = useMemo(() => {
     return getDatabase(supabase)
-  }, [supabase])
+  }, [supabase, user])
 
   return (
     <DatabaseContext.Provider value={{ database }}>
