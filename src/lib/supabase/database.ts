@@ -1,4 +1,4 @@
-import { supabase } from './client'
+import { SupabaseClient } from '@supabase/supabase-js'
 import { Database } from './types'
 import { Space, Sample, CreateSpaceData, CreateSampleData, SpaceType, SoundType, SignalQuality } from '@/lib/types'
 import type { User } from '@supabase/supabase-js'
@@ -9,9 +9,11 @@ type SampleRow = Tables['samples']['Row']
 type ProfileRow = Tables['profiles']['Row']
 
 class SupabaseDatabase {
+  constructor(private supabase: SupabaseClient<Database>) {}
+
   // Auth helpers
   async signUp(email: string, password: string, fullName?: string) {
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await this.supabase.auth.signUp({
       email,
       password,
       options: {
@@ -25,7 +27,7 @@ class SupabaseDatabase {
   }
 
   async signIn(email: string, password: string) {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await this.supabase.auth.signInWithPassword({
       email,
       password,
     })
@@ -34,12 +36,12 @@ class SupabaseDatabase {
   }
 
   async signOut() {
-    const { error } = await supabase.auth.signOut()
+    const { error } = await this.supabase.auth.signOut()
     if (error) throw error
   }
 
   async getProfile(userId: string): Promise<ProfileRow | null> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from('profiles')
       .select('*')
       .eq('id', userId)
@@ -50,7 +52,7 @@ class SupabaseDatabase {
   }
 
   async updateProfile(userId: string, updates: Partial<ProfileRow>) {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from('profiles')
       .update(updates)
       .eq('id', userId)
@@ -63,7 +65,7 @@ class SupabaseDatabase {
 
   // Space operations
   async createSpace(user: User, data: CreateSpaceData): Promise<Space> {
-    const { data: spaceData, error } = await supabase
+    const { data: spaceData, error } = await this.supabase
       .from('spaces')
       .insert({
         user_id: user.id,
@@ -82,7 +84,7 @@ class SupabaseDatabase {
   }
 
   async getSpace(user: User, id: string): Promise<Space | null> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from('spaces')
       .select('*')
       .eq('id', id)
@@ -94,7 +96,7 @@ class SupabaseDatabase {
   }
 
   async getAllSpaces(user: User): Promise<Space[]> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from('spaces')
       .select('*')
       .eq('user_id', user.id)
@@ -105,7 +107,7 @@ class SupabaseDatabase {
   }
 
   async updateSpace(user: User, id: string, updates: Partial<Space>): Promise<Space> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from('spaces')
       .update({
         name: updates.name,
@@ -127,7 +129,7 @@ class SupabaseDatabase {
 
   async deleteSpace(user: User, id: string): Promise<void> {
     // Delete associated samples first
-    const { error: samplesError } = await supabase
+    const { error: samplesError } = await this.supabase
       .from('samples')
       .delete()
       .eq('space_id', id)
@@ -136,7 +138,7 @@ class SupabaseDatabase {
     if (samplesError) throw samplesError
 
     // Delete the space
-    const { error } = await supabase
+    const { error } = await this.supabase
       .from('spaces')
       .delete()
       .eq('id', id)
@@ -146,7 +148,7 @@ class SupabaseDatabase {
   }
 
   async getSpaceCount(user: User): Promise<number> {
-    const { count, error } = await supabase
+    const { count, error } = await this.supabase
       .from('spaces')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
@@ -157,7 +159,7 @@ class SupabaseDatabase {
 
   // Sample operations
   async createSample(user: User, data: CreateSampleData): Promise<Sample> {
-    const { data: sampleData, error } = await supabase
+    const { data: sampleData, error } = await this.supabase
       .from('samples')
       .insert({
         user_id: user.id,
@@ -180,7 +182,7 @@ class SupabaseDatabase {
   }
 
   async getSample(user: User, id: string): Promise<Sample | null> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from('samples')
       .select('*')
       .eq('id', id)
@@ -192,7 +194,7 @@ class SupabaseDatabase {
   }
 
   async getSamplesForSpace(user: User, spaceId: string): Promise<Sample[]> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from('samples')
       .select('*')
       .eq('space_id', spaceId)
@@ -204,7 +206,7 @@ class SupabaseDatabase {
   }
 
   async getAllSamples(user: User): Promise<Sample[]> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from('samples')
       .select('*')
       .eq('user_id', user.id)
@@ -215,7 +217,7 @@ class SupabaseDatabase {
   }
 
   async getRecentSamples(user: User, limit: number = 5): Promise<Sample[]> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from('samples')
       .select('*')
       .eq('user_id', user.id)
@@ -227,7 +229,7 @@ class SupabaseDatabase {
   }
 
   async updateSample(user: User, id: string, updates: Partial<Sample>): Promise<Sample> {
-    const { data, error } = await supabase
+    const { data, error } = await this.supabase
       .from('samples')
       .update({
         sound_type: updates.soundType,
@@ -249,7 +251,7 @@ class SupabaseDatabase {
   }
 
   async deleteSample(user: User, id: string): Promise<void> {
-    const { error } = await supabase
+    const { error } = await this.supabase
       .from('samples')
       .delete()
       .eq('id', id)
@@ -259,7 +261,7 @@ class SupabaseDatabase {
   }
 
   async getSampleCount(user: User): Promise<number> {
-    const { count, error } = await supabase
+    const { count, error } = await this.supabase
       .from('samples')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id)
@@ -273,7 +275,7 @@ class SupabaseDatabase {
     const fileExt = file.name.split('.').pop()
     const fileName = `${user.id}/${sampleId}.${fileExt}`
 
-    const { data, error } = await supabase.storage
+    const { data, error } = await this.supabase.storage
       .from('audio-files')
       .upload(fileName, file, {
         cacheControl: '3600',
@@ -283,7 +285,7 @@ class SupabaseDatabase {
     if (error) throw error
 
     // Store file metadata
-    await supabase
+    await this.supabase
       .from('audio_files')
       .insert({
         user_id: user.id,
@@ -299,7 +301,7 @@ class SupabaseDatabase {
   }
 
   async getAudioFileUrl(filePath: string): Promise<string> {
-    const { data } = await supabase.storage
+    const { data } = await this.supabase.storage
       .from('audio-files')
       .createSignedUrl(filePath, 3600) // 1 hour expiry
 
@@ -308,7 +310,7 @@ class SupabaseDatabase {
   }
 
   async deleteAudioFile(filePath: string): Promise<void> {
-    const { error } = await supabase.storage
+    const { error } = await this.supabase.storage
       .from('audio-files')
       .remove([filePath])
 
@@ -349,4 +351,4 @@ class SupabaseDatabase {
   }
 }
 
-export const database = new SupabaseDatabase()
+export const getDatabase = (supabase: SupabaseClient<Database>) => new SupabaseDatabase(supabase)

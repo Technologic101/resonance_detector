@@ -23,9 +23,6 @@ export const createClient = () => {
   })
 }
 
-// Always create the client - let createClient() handle any missing variables
-export const supabase = createClient()
-
 // Export environment info for debugging
 export const getEnvironmentInfo = () => ({
   supabaseUrl: supabaseUrl ? `${supabaseUrl.slice(0, 20)}...` : 'Not set',

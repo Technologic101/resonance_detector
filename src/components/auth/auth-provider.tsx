@@ -1,12 +1,14 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { User } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase/client'
+import { User, SupabaseClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/client'
+import { Database } from '@/lib/supabase/types'
 
 interface AuthContextType {
   user: User | null
   loading: boolean
+  supabase: SupabaseClient<Database>
   signUp: (email: string, password: string, fullName?: string) => Promise<void>
   signIn: (email: string, password: string) => Promise<void>
   signOut: () => Promise<void>
@@ -17,6 +19,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [supabase] = useState(() => createClient())
 
   useEffect(() => {
     // Get initial session
@@ -37,7 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     )
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [supabase])
 
   const signUp = async (email: string, password: string, fullName?: string) => {
     const { error } = await supabase.auth.signUp({
@@ -69,6 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider value={{
       user,
       loading,
+      supabase,
       signUp,
       signIn,
       signOut,
