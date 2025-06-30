@@ -3,7 +3,6 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { AuthProvider } from '@/components/auth/auth-provider'
-import { EnvironmentIndicator } from '@/components/ui/environment-indicator'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -28,7 +27,6 @@ export default function RootLayout({
         >
           <AuthProvider>
             {children}
-            <EnvironmentIndicator />
           </AuthProvider>
         </ThemeProvider>
       </body>
