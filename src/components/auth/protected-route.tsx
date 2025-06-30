@@ -5,6 +5,8 @@ import { AuthModal } from './auth-modal'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Waves, Mic, BarChart3, Building2, Zap, Shield, Cloud, Users, Music } from 'lucide-react'
+import { useTheme } from 'next-themes'
+import Image from 'next/image'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -13,6 +15,7 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
   const { user, loading } = useAuth()
+  const { theme } = useTheme()
   const [showAuthModal, setShowAuthModal] = useState(false)
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
 
@@ -55,6 +58,25 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
                 </div>
               </div>
               <div className="flex items-center space-x-3">
+                {/* Bolt.new logo with theme-aware switching */}
+                <a 
+                  href="https://bolt.new" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+                  title="Made with bolt.new"
+                >
+                  <Image
+                    src={theme === 'dark' ? '/white_circle_360x360.png' : '/black_circle_360x360.png'}
+                    alt="bolt.new"
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                  />
+                  <span className="text-sm text-muted-foreground hidden sm:block">
+                    Made with bolt.new
+                  </span>
+                </a>
                 <Button
                   variant="outline"
                   onClick={() => {
