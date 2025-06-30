@@ -22,10 +22,3 @@ export const createClient = () => {
     supabaseKey: supabaseAnonKey,
   })
 }
-
-// Export environment info for debugging
-export const getEnvironmentInfo = () => ({
-  supabaseUrl: supabaseUrl ? `${supabaseUrl.slice(0, 20)}...` : 'Not set',
-  hasAnonKey: !!supabaseAnonKey,
-  environment: 'production'
-})
