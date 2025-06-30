@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { MoreVertical, Edit, Trash2, Mic, Eye } from 'lucide-react'
 import { Space } from '@/lib/types'
-import { database } from '@/lib/supabase/database'
+import { useDatabase } from '@/components/providers/database-provider'
 import { useAuth } from '@/components/auth/auth-provider'
 import { useNavigation } from '@/lib/context/navigation-context'
 import { getSpaceTypeLabel, formatDate } from '@/lib/utils/space-utils'
@@ -16,6 +16,7 @@ interface SpaceCardProps {
 
 export function SpaceCard({ space, onUpdate }: SpaceCardProps) {
   const { user } = useAuth()
+  const database = useDatabase()
   const { navigateToRecording, navigateToSpace } = useNavigation()
   const [showMenu, setShowMenu] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
