@@ -9,7 +9,7 @@ import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { ProcessingOverlay } from '@/components/ui/processing-overlay'
 import { ArrowLeft, Building2 } from 'lucide-react'
 import { useNavigation } from '@/lib/context/navigation-context'
-import { database } from '@/lib/database'
+import { database } from '@/lib/supabase/database'
 import { SpaceType } from '@/lib/types'
 import { getSpaceTypeLabel } from '@/lib/utils/space-utils'
 
@@ -49,7 +49,7 @@ export function CreateSpaceForm({ onSuccess }: CreateSpaceFormProps) {
   const onSubmit = async (data: CreateSpaceFormData) => {
     setIsSubmitting(true)
     try {
-      // Create the space
+      // Create the space using Supabase
       const newSpace = await database.createSpace(data)
       
       // Call success callback to refresh spaces list
@@ -59,7 +59,6 @@ export function CreateSpaceForm({ onSuccess }: CreateSpaceFormProps) {
       navigateToSpace(newSpace.id)
     } catch (error) {
       console.error('Failed to create space:', error)
-      // TODO: Show error toast
       alert('Failed to create space. Please try again.')
     } finally {
       setIsSubmitting(false)

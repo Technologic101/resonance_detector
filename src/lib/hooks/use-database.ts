@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { database } from '@/lib/database'
+import { database } from '@/lib/supabase/database'
 import { Space, Sample } from '@/lib/types'
 
 export function useSpaces() {
@@ -12,11 +12,8 @@ export function useSpaces() {
       setLoading(true)
       setError(null)
       
-      // Ensure database is initialized
-      await database.init()
-      
       const allSpaces = await database.getAllSpaces()
-      setSpaces(allSpaces.reverse()) // Most recent first
+      setSpaces(allSpaces) // Already sorted by updated_at DESC from Supabase
     } catch (err) {
       console.error('Error loading spaces:', err)
       setError(err instanceof Error ? err.message : 'Failed to load spaces')
@@ -53,9 +50,6 @@ export function useSpace(id: string | null) {
       setLoading(true)
       setError(null)
       
-      // Ensure database is initialized
-      await database.init()
-      
       const foundSpace = await database.getSpace(id)
       setSpace(foundSpace || null)
     } catch (err) {
@@ -88,13 +82,10 @@ export function useSamples(spaceId?: string) {
       setLoading(true)
       setError(null)
       
-      // Ensure database is initialized
-      await database.init()
-      
       const allSamples = spaceId 
         ? await database.getSamplesForSpace(spaceId)
         : await database.getAllSamples()
-      setSamples(allSamples.reverse()) // Most recent first
+      setSamples(allSamples) // Already sorted by recorded_at DESC from Supabase
     } catch (err) {
       console.error('Error loading samples:', err)
       setError(err instanceof Error ? err.message : 'Failed to load samples')
@@ -127,13 +118,6 @@ export function useStats() {
     try {
       setLoading(true)
       setError(null)
-      
-      // Ensure database is initialized before getting stats
-      await database.init()
-      
-      // Add a small delay to ensure database is fully ready
-      // This helps with first load issues
-      await new Promise(resolve => setTimeout(resolve, 100))
       
       const [spaceCount, sampleCount] = await Promise.all([
         database.getSpaceCount(),
@@ -172,13 +156,6 @@ export function useRecentSamples(limit: number = 5) {
     try {
       setLoading(true)
       setError(null)
-      
-      // Ensure database is initialized
-      await database.init()
-      
-      // Add a small delay to ensure database is fully ready
-      // This helps with first load issues
-      await new Promise(resolve => setTimeout(resolve, 100))
       
       const recentSamples = await database.getRecentSamples(limit)
       setSamples(recentSamples)
