@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { database } from '@/lib/supabase/database'
 import { Space, Sample } from '@/lib/types'
+import { useAuth } from '@/components/auth/auth-provider'
 
 export function useSpaces() {
   const [spaces, setSpaces] = useState<Space[]>([])
@@ -107,6 +108,7 @@ export function useSamples(spaceId?: string) {
 }
 
 export function useStats() {
+  const { user } = useAuth()
   const [stats, setStats] = useState({
     spaceCount: 0,
     sampleCount: 0,
@@ -115,6 +117,12 @@ export function useStats() {
   const [error, setError] = useState<string | null>(null)
 
   const loadStats = useCallback(async () => {
+    if (!user) {
+      setStats({ spaceCount: 0, sampleCount: 0 })
+      setLoading(false)
+      return
+    }
+
     try {
       setLoading(true)
       setError(null)
@@ -133,7 +141,7 @@ export function useStats() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [user])
 
   useEffect(() => {
     loadStats()
@@ -148,11 +156,18 @@ export function useStats() {
 }
 
 export function useRecentSamples(limit: number = 5) {
+  const { user } = useAuth()
   const [samples, setSamples] = useState<Sample[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const loadRecentSamples = useCallback(async () => {
+    if (!user) {
+      setSamples([])
+      setLoading(false)
+      return
+    }
+
     try {
       setLoading(true)
       setError(null)
@@ -167,7 +182,7 @@ export function useRecentSamples(limit: number = 5) {
     } finally {
       setLoading(false)
     }
-  }, [limit])
+  }, [limit, user])
 
   useEffect(() => {
     loadRecentSamples()
