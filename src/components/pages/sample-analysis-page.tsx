@@ -10,7 +10,7 @@ import { SampleDetailView } from '@/components/ui/sample-detail-view'
 import { RoomModeCalculator } from '@/components/ui/room-mode-calculator'
 
 export function SampleAnalysisPage() {
-  const { setCurrentPage, navigationState } = useNavigation()
+  const { goBack, navigationState } = useNavigation()
   const { samples, loading: samplesLoading } = useSamples()
   const { space } = useSpace(navigationState.selectedSpaceId || null)
   const [showRoomCalculator, setShowRoomCalculator] = useState(false)
@@ -55,7 +55,7 @@ export function SampleAnalysisPage() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setCurrentPage('analysis')}
+              onClick={goBack}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -102,7 +102,7 @@ export function SampleAnalysisPage() {
                 <p className="text-muted-foreground mb-4">
                   Return to the analysis page to select a sample for detailed analysis.
                 </p>
-                <Button onClick={() => setCurrentPage('analysis')}>
+                <Button onClick={goBack}>
                   Go to Analysis
                 </Button>
               </div>

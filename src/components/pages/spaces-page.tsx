@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { Building2, Plus, Search, X } from 'lucide-react'
+import { Building2, Plus, Search, X, ArrowLeft } from 'lucide-react'
 import { useSpaces } from '@/lib/hooks/use-database'
 import { useNavigation } from '@/lib/context/navigation-context'
 import { CreateSpaceForm } from '@/components/forms/create-space-form'
@@ -12,7 +12,7 @@ import { SpaceDetailsView } from '@/components/ui/space-details-view'
 
 export function SpacesPage() {
   const { spaces, loading, refetch } = useSpaces()
-  const { navigateToCreateSpace, navigationState } = useNavigation()
+  const { navigateToCreateSpace, goBack, navigationState, setCurrentPage } = useNavigation()
   const [searchQuery, setSearchQuery] = useState('')
 
   const filteredSpaces = spaces.filter(space =>
@@ -40,6 +40,13 @@ export function SpacesPage() {
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setCurrentPage('home')}
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
             <Building2 className="h-8 w-8 text-primary" />
             <h1 className="text-2xl font-bold">Spaces</h1>
           </div>

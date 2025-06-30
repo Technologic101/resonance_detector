@@ -5,8 +5,7 @@ import { FrequencyChart } from '@/components/ui/frequency-chart'
 import { InfoTooltip } from '@/components/ui/tooltip'
 import { Sample } from '@/lib/types'
 import { formatDateTime, getSoundTypeLabel, formatFrequency } from '@/lib/utils/space-utils'
-import { generateAnalysisText } from '@/lib/utils/analysis-utils'
-import { Download, Mic, BarChart3, Zap, Info } from 'lucide-react'
+import { Download, Mic, BarChart3, Zap } from 'lucide-react'
 
 interface SampleDetailViewProps {
   sample: Sample
@@ -32,17 +31,7 @@ export function SampleDetailView({ sample, onExport }: SampleDetailViewProps) {
           </Button>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-          <div className="bg-background p-3 rounded-lg">
-            <div className="text-sm text-muted-foreground flex items-center gap-1">
-              Duration
-              <InfoTooltip 
-                content="Length of the recording in seconds. Longer recordings may capture more frequency information."
-                side="top"
-              />
-            </div>
-            <div className="font-semibold">{sample.duration.toFixed(1)}s</div>
-          </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
           <div className="bg-background p-3 rounded-lg">
             <div className="text-sm text-muted-foreground flex items-center gap-1">
               Signal Quality
@@ -183,108 +172,84 @@ export function SampleDetailView({ sample, onExport }: SampleDetailViewProps) {
         )}
       </div>
       
-      {/* Resonance Analysis */}
-      <div className="bg-card border rounded-lg p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <h3 className="font-semibold flex items-center">
-            <Info className="h-5 w-5 mr-2 text-primary" />
-            Resonance Analysis
-          </h3>
-          <InfoTooltip 
-            content="Advanced acoustic analysis including fundamental frequency, harmonics, and signal quality metrics."
-            side="right"
-          />
-        </div>
-        
-        <div className="space-y-4">
-          {sample.spectralData && Object.keys(sample.spectralData).length > 0 ? (
-            <>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {sample.spectralData.fundamentalFrequency && (
-                  <div className="bg-background p-3 rounded-lg">
-                    <div className="text-sm text-muted-foreground flex items-center gap-1">
-                      Fundamental
-                      <InfoTooltip 
-                        content="The lowest, most prominent frequency. Often indicates the primary resonance of the space."
-                        side="top"
-                      />
-                    </div>
-                    <div className="font-semibold">
-                      {formatFrequency(sample.spectralData.fundamentalFrequency)}
-                    </div>
-                  </div>
-                )}
-                
-                {sample.spectralData.snr !== undefined && (
-                  <div className="bg-background p-3 rounded-lg">
-                    <div className="text-sm text-muted-foreground flex items-center gap-1">
-                      Signal-to-Noise
-                      <InfoTooltip 
-                        content="Ratio of signal strength to background noise in decibels. Higher values indicate cleaner recordings."
-                        side="top"
-                      />
-                    </div>
-                    <div className="font-semibold">
-                      {sample.spectralData.snr.toFixed(1)} dB
-                    </div>
-                  </div>
-                )}
-                
-                {sample.spectralData.thd !== undefined && (
-                  <div className="bg-background p-3 rounded-lg">
-                    <div className="text-sm text-muted-foreground flex items-center gap-1">
-                      THD
-                      <InfoTooltip 
-                        content="Total Harmonic Distortion - measures signal purity. Lower values indicate cleaner recordings."
-                        side="top"
-                      />
-                    </div>
-                    <div className="font-semibold">
-                      {sample.spectralData.thd.toFixed(2)}%
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              {sample.spectralData.harmonics && sample.spectralData.harmonics.length > 0 && (
-                <div>
-                  <div className="flex items-center gap-1 mb-2">
-                    <h4 className="text-sm font-medium">Harmonic Frequencies</h4>
-                    <InfoTooltip 
-                      content="Frequencies that are mathematical multiples of the fundamental. These indicate resonant modes and acoustic characteristics."
-                      side="right"
-                    />
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {sample.spectralData.harmonics.map((freq, index) => (
-                      <div key={index} className="px-2 py-1 bg-primary/10 rounded-full text-xs">
-                        {formatFrequency(freq)}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              <div className="border-t pt-4 mt-4">
-                <div className="flex items-center gap-1 mb-2">
-                  <h4 className="text-sm font-medium">Interpretation</h4>
+      {/* Advanced Metrics */}
+      {sample.spectralData && Object.keys(sample.spectralData).length > 0 && (
+        <div className="bg-card border rounded-lg p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="font-semibold">Advanced Metrics</h3>
+            <InfoTooltip 
+              content="Detailed acoustic analysis including fundamental frequency, harmonics, and signal quality metrics."
+              side="right"
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {sample.spectralData.fundamentalFrequency && (
+              <div className="bg-background p-3 rounded-lg">
+                <div className="text-sm text-muted-foreground flex items-center gap-1">
+                  Fundamental
                   <InfoTooltip 
-                    content="AI-generated analysis providing insights into potential acoustic issues, resonances, and recommendations."
-                    side="right"
+                    content="The lowest, most prominent frequency. Often indicates the primary resonance of the space."
+                    side="top"
                   />
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  {generateAnalysisText(sample)}
-                </p>
+                <div className="font-semibold">
+                  {formatFrequency(sample.spectralData.fundamentalFrequency)}
+                </div>
               </div>
-            </>
-          ) : (
-            <div className="text-center py-4 text-muted-foreground">
-              No detailed spectral data available for this recording
+            )}
+            
+            {sample.spectralData.snr !== undefined && (
+              <div className="bg-background p-3 rounded-lg">
+                <div className="text-sm text-muted-foreground flex items-center gap-1">
+                  Signal-to-Noise
+                  <InfoTooltip 
+                    content="Ratio of signal strength to background noise in decibels. Higher values indicate cleaner recordings."
+                    side="top"
+                  />
+                </div>
+                <div className="font-semibold">
+                  {sample.spectralData.snr.toFixed(1)} dB
+                </div>
+              </div>
+            )}
+            
+            {sample.spectralData.thd !== undefined && (
+              <div className="bg-background p-3 rounded-lg">
+                <div className="text-sm text-muted-foreground flex items-center gap-1">
+                  THD
+                  <InfoTooltip 
+                    content="Total Harmonic Distortion - measures signal purity. Lower values indicate cleaner recordings."
+                    side="top"
+                  />
+                </div>
+                <div className="font-semibold">
+                  {sample.spectralData.thd.toFixed(2)}%
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {sample.spectralData.harmonics && sample.spectralData.harmonics.length > 0 && (
+            <div className="mt-4">
+              <div className="flex items-center gap-1 mb-2">
+                <h4 className="text-sm font-medium">Harmonic Frequencies</h4>
+                <InfoTooltip 
+                  content="Frequencies that are mathematical multiples of the fundamental. These indicate resonant modes and acoustic characteristics."
+                  side="right"
+                />
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {sample.spectralData.harmonics.map((freq, index) => (
+                  <div key={index} className="px-2 py-1 bg-primary/10 rounded-full text-xs">
+                    {formatFrequency(freq)}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
-      </div>
+      )}
     </div>
   )
 }

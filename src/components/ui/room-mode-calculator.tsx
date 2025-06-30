@@ -186,21 +186,6 @@ export function RoomModeCalculator({ className = '' }: RoomModeCalculatorProps) 
               )}
             </div>
           </div>
-          
-          <div className="border-t pt-4 mt-4">
-            <h4 className="text-sm font-medium mb-2">Interpretation</h4>
-            <p className="text-sm text-muted-foreground">
-              The Schroeder frequency ({formatFrequency(schroederFreq)}) marks the transition between individual room modes and statistical behavior. 
-              Below this frequency, individual room modes dominate the acoustic response. 
-              The calculated reverberation time of {reverbTime.toFixed(2)} seconds is {
-                reverbTime < 0.3 ? 'very short, typical for highly treated spaces' :
-                reverbTime < 0.5 ? 'short, suitable for recording studios' :
-                reverbTime < 0.8 ? 'moderate, good for speech intelligibility' :
-                reverbTime < 1.2 ? 'typical for living spaces' :
-                'long, which may cause acoustic issues'
-              }.
-            </p>
-          </div>
         </div>
       )}
     </div>

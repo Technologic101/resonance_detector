@@ -16,7 +16,7 @@ import { SoundType, SignalQuality } from '@/lib/types'
 import { formatDuration, getSoundTypeLabel } from '@/lib/utils/space-utils'
 
 export function RecordingPage() {
-  const { setCurrentPage, navigationState } = useNavigation()
+  const { goBack, navigationState } = useNavigation()
   const { user } = useAuth()
   const { spaces } = useSpaces()
   const [selectedSpaceId, setSelectedSpaceId] = useState<string>(navigationState.selectedSpaceId || '')
@@ -178,7 +178,7 @@ export function RecordingPage() {
       
       // Auto-navigate back after successful save
       setTimeout(() => {
-        setCurrentPage('spaces')
+        goBack()
       }, 2000)
     } catch (error) {
       console.error('Failed to save recording:', error)
@@ -201,7 +201,7 @@ export function RecordingPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setCurrentPage('home')}
+                onClick={goBack}
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
@@ -240,7 +240,7 @@ export function RecordingPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setCurrentPage('home')}
+                onClick={goBack}
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
@@ -277,7 +277,7 @@ export function RecordingPage() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setCurrentPage('home')}
+              onClick={goBack}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -296,7 +296,7 @@ export function RecordingPage() {
             <div className="flex items-center space-x-2">
               <CheckCircle className="h-5 w-5 text-green-600" />
               <span className="text-green-800 dark:text-green-200 font-medium">
-                Recording saved successfully! Redirecting to spaces...
+                Recording saved successfully! Redirecting...
               </span>
             </div>
           </div>
@@ -489,9 +489,6 @@ export function RecordingPage() {
                 <div className="text-center mt-4">
                   <p className="text-sm text-green-600 font-medium">
                     Recording ready to save! ({(recordingBlob.size / 1024).toFixed(1)} KB)
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Duration: {formatDuration(recordingState.duration || 0)}
                   </p>
                 </div>
               )}

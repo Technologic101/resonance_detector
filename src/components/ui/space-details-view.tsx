@@ -14,7 +14,7 @@ interface SpaceDetailsViewProps {
 }
 
 export function SpaceDetailsView({ space, onUpdate }: SpaceDetailsViewProps) {
-  const { setCurrentPage, navigateToRecording } = useNavigation()
+  const { goBack, navigateToRecording } = useNavigation()
   const { samples, loading: samplesLoading } = useSamples(space.id)
 
   const handleRecord = () => {
@@ -30,7 +30,7 @@ export function SpaceDetailsView({ space, onUpdate }: SpaceDetailsViewProps) {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setCurrentPage('spaces')}
+              onClick={goBack}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -140,9 +140,6 @@ export function SpaceDetailsView({ space, onUpdate }: SpaceDetailsViewProps) {
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <span className="text-sm text-muted-foreground">
-                        {sample.duration.toFixed(1)}s
-                      </span>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getSignalQualityBgColor(sample.signalQuality)}`}>
                         {sample.signalQuality.toUpperCase()}
                       </span>

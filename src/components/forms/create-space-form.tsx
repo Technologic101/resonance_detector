@@ -27,7 +27,7 @@ interface CreateSpaceFormProps {
 }
 
 export function CreateSpaceForm({ onSuccess }: CreateSpaceFormProps) {
-  const { setCurrentPage, navigateToSpace } = useNavigation()
+  const { goBack, navigateToSpace } = useNavigation()
   const { user } = useAuth()
   const database = useDatabase()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -102,7 +102,7 @@ export function CreateSpaceForm({ onSuccess }: CreateSpaceFormProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setCurrentPage('spaces')}
+                onClick={goBack}
                 disabled={isSubmitting}
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -185,7 +185,7 @@ export function CreateSpaceForm({ onSuccess }: CreateSpaceFormProps) {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => setCurrentPage('spaces')}
+                onClick={goBack}
                 disabled={isSubmitting}
                 className="flex-1"
               >

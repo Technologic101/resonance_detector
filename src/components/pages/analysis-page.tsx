@@ -4,14 +4,14 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { InfoTooltip } from '@/components/ui/tooltip'
-import { BarChart3, ArrowLeft, Filter, Download, Waves, Zap, Info } from 'lucide-react'
+import { BarChart3, ArrowLeft, Filter, Download, Waves, Zap } from 'lucide-react'
 import { useNavigation } from '@/lib/context/navigation-context'
 import { useSamples } from '@/lib/hooks/use-database'
 import { SoundType, SignalQuality } from '@/lib/types'
 import { formatDateTime, getSoundTypeLabel, getSignalQualityBgColor, formatFrequency } from '@/lib/utils/space-utils'
 
 export function AnalysisPage() {
-  const { setCurrentPage, navigateToSample, navigationState } = useNavigation()
+  const { goBack, navigateToSample, navigationState } = useNavigation()
   const [selectedSampleId, setSelectedSampleId] = useState<string | null>(navigationState.selectedSampleId || null)
   const { samples, loading } = useSamples()
   const [filterType, setFilterType] = useState<SoundType | 'all'>('all')
@@ -82,7 +82,7 @@ export function AnalysisPage() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setCurrentPage('home')}
+              onClick={goBack}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -167,7 +167,7 @@ export function AnalysisPage() {
                       ? `No ${getSoundTypeLabel(filterType as SoundType).toLowerCase()} recordings found.` 
                       : 'Record some audio samples to analyze them.'}
                   </p>
-                  <Button onClick={() => setCurrentPage('recording')}>
+                  <Button onClick={() => navigateToRecording()}>
                     Record New Sample
                   </Button>
                 </div>
@@ -191,7 +191,6 @@ export function AnalysisPage() {
                         {formatDateTime(sample.recordedAt)}
                       </div>
                       <div className="text-sm mt-1 flex items-center gap-2">
-                        <span className="text-primary">{sample.duration.toFixed(1)}s</span>
                         {sample.peaks.length > 0 && (
                           <span>{sample.peaks.length} peaks detected</span>
                         )}
@@ -221,7 +220,7 @@ export function AnalysisPage() {
                     <div className="flex items-center gap-2">
                       <h2 className="text-xl font-semibold">{getSoundTypeLabel(selectedSample.soundType)} Analysis</h2>
                       <InfoTooltip 
-                        content="This section shows basic information about your recording including duration, signal quality, and recording conditions."
+                        content="This section shows basic information about your recording including signal quality and recording conditions."
                         side="right"
                       />
                     </div>
@@ -231,22 +230,12 @@ export function AnalysisPage() {
                     </Button>
                   </div>
                   
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    <div className="bg-background p-3 rounded-lg">
-                      <div className="text-sm text-muted-foreground flex items-center gap-1">
-                        Duration
-                        <InfoTooltip 
-                          content="The length of your recording in seconds. Longer recordings may capture more frequency information."
-                          side="top"
-                        />
-                      </div>
-                      <div className="font-semibold">{selectedSample.duration.toFixed(1)}s</div>
-                    </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
                     <div className="bg-background p-3 rounded-lg">
                       <div className="text-sm text-muted-foreground flex items-center gap-1">
                         Signal Quality
                         <InfoTooltip 
-                          content="Overall quality of the recording based on signal strength, noise levels, and frequency content. Higher quality recordings provide more accurate analysis."
+                          content="Overall quality assessment based on signal strength, noise levels, and frequency content. Higher quality recordings provide more accurate analysis."
                           side="top"
                         />
                       </div>
@@ -266,7 +255,7 @@ export function AnalysisPage() {
                       <div className="text-sm text-muted-foreground flex items-center gap-1">
                         Sample Rate
                         <InfoTooltip 
-                          content="How many audio samples per second were captured. Higher sample rates can capture higher frequencies (up to half the sample rate)."
+                          content="Audio sampling frequency. Higher rates can capture higher frequencies (up to half the sample rate)."
                           side="top"
                         />
                       </div>
@@ -427,111 +416,6 @@ export function AnalysisPage() {
                     )}
                   </div>
                 </div>
-                
-                {/* Resonance Analysis */}
-                <div className="bg-card border rounded-lg p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <h3 className="font-semibold flex items-center">
-                      <Info className="h-5 w-5 mr-2 text-primary" />
-                      Resonance Analysis
-                    </h3>
-                    <InfoTooltip 
-                      content="Advanced acoustic analysis including fundamental frequency, harmonics, and signal quality metrics. These help identify structural resonances and acoustic properties."
-                      side="right"
-                    />
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {selectedSample.spectralData && (
-                      <>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                          {selectedSample.spectralData.fundamentalFrequency && (
-                            <div className="bg-background p-3 rounded-lg">
-                              <div className="text-sm text-muted-foreground flex items-center gap-1">
-                                Fundamental
-                                <InfoTooltip 
-                                  content="The lowest, most prominent frequency in the recording. Often indicates the primary resonance of the space or structure."
-                                  side="top"
-                                />
-                              </div>
-                              <div className="font-semibold">
-                                {formatFrequency(selectedSample.spectralData.fundamentalFrequency)}
-                              </div>
-                            </div>
-                          )}
-                          
-                          {selectedSample.spectralData.snr !== undefined && (
-                            <div className="bg-background p-3 rounded-lg">
-                              <div className="text-sm text-muted-foreground flex items-center gap-1">
-                                Signal-to-Noise
-                                <InfoTooltip 
-                                  content="Ratio of signal strength to background noise in decibels (dB). Higher values indicate cleaner recordings with less interference."
-                                  side="top"
-                                />
-                              </div>
-                              <div className="font-semibold">
-                                {selectedSample.spectralData.snr.toFixed(1)} dB
-                              </div>
-                            </div>
-                          )}
-                          
-                          {selectedSample.spectralData.thd !== undefined && (
-                            <div className="bg-background p-3 rounded-lg">
-                              <div className="text-sm text-muted-foreground flex items-center gap-1">
-                                THD
-                                <InfoTooltip 
-                                  content="Total Harmonic Distortion - measures how much the signal deviates from a pure tone. Lower values indicate cleaner, more accurate recordings."
-                                  side="top"
-                                />
-                              </div>
-                              <div className="font-semibold">
-                                {selectedSample.spectralData.thd.toFixed(2)}%
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                        
-                        {selectedSample.spectralData.harmonics && selectedSample.spectralData.harmonics.length > 0 && (
-                          <div>
-                            <div className="flex items-center gap-1 mb-2">
-                              <h4 className="text-sm font-medium">Harmonic Frequencies</h4>
-                              <InfoTooltip 
-                                content="Frequencies that are mathematical multiples of the fundamental frequency. These indicate resonant modes and acoustic characteristics of the space."
-                                side="right"
-                              />
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                              {selectedSample.spectralData.harmonics.map((freq, index) => (
-                                <div key={index} className="px-2 py-1 bg-primary/10 rounded-full text-xs">
-                                  {formatFrequency(freq)}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        
-                        <div className="border-t pt-4 mt-4">
-                          <div className="flex items-center gap-1 mb-2">
-                            <h4 className="text-sm font-medium">Interpretation</h4>
-                            <InfoTooltip 
-                              content="AI-generated analysis of your recording results, providing insights into potential acoustic issues, resonances, and recommendations for further analysis."
-                              side="right"
-                            />
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            {getResonanceInterpretation(selectedSample)}
-                          </p>
-                        </div>
-                      </>
-                    )}
-                    
-                    {(!selectedSample.spectralData || Object.keys(selectedSample.spectralData).length === 0) && (
-                      <div className="text-center py-4 text-muted-foreground">
-                        No detailed spectral data available for this recording
-                      </div>
-                    )}
-                  </div>
-                </div>
               </div>
             )}
           </div>
@@ -539,54 +423,4 @@ export function AnalysisPage() {
       </main>
     </div>
   )
-}
-
-// Helper function to generate interpretation text based on sample data
-function getResonanceInterpretation(sample: any): string {
-  if (!sample.peaks || sample.peaks.length === 0) {
-    return "No significant resonance detected in this recording.";
-  }
-  
-  // Get the top 3 peaks by amplitude
-  const topPeaks = [...sample.peaks].sort((a, b) => b.amplitude - a.amplitude).slice(0, 3);
-  
-  // Check if there are strong low frequency resonances
-  const lowFreqPeaks = topPeaks.filter(p => p.frequency < 200);
-  const midFreqPeaks = topPeaks.filter(p => p.frequency >= 200 && p.frequency < 1000);
-  const highFreqPeaks = topPeaks.filter(p => p.frequency >= 1000);
-  
-  let interpretation = "";
-  
-  if (lowFreqPeaks.length > 0) {
-    interpretation += `Strong low frequency resonance detected at ${formatFrequency(lowFreqPeaks[0].frequency)}. `;
-    interpretation += "This may indicate structural vibrations or HVAC system issues. ";
-  }
-  
-  if (midFreqPeaks.length > 0) {
-    interpretation += `Notable mid-range resonance at ${formatFrequency(midFreqPeaks[0].frequency)}. `;
-    interpretation += "This could be related to room dimensions or interior features. ";
-  }
-  
-  if (highFreqPeaks.length > 0) {
-    interpretation += `High frequency components at ${formatFrequency(highFreqPeaks[0].frequency)}. `;
-    interpretation += "Typically associated with smaller objects or electronic equipment. ";
-  }
-  
-  if (sample.spectralData?.snr !== undefined) {
-    if (sample.spectralData.snr > 30) {
-      interpretation += "Excellent signal-to-noise ratio indicates clear resonance patterns. ";
-    } else if (sample.spectralData.snr > 15) {
-      interpretation += "Good signal-to-noise ratio provides reliable analysis. ";
-    } else {
-      interpretation += "Low signal-to-noise ratio may affect analysis accuracy. Consider re-recording in quieter conditions. ";
-    }
-  }
-  
-  if (interpretation === "") {
-    interpretation = "Analysis complete. No significant building resonance issues detected in this recording.";
-  } else {
-    interpretation += "Consider multiple recordings at different locations for comprehensive analysis.";
-  }
-  
-  return interpretation;
 }
