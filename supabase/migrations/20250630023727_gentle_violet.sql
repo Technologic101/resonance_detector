@@ -218,31 +218,6 @@ CREATE POLICY "Users can delete own samples"
   TO authenticated
   USING (auth.uid() = user_id);
 
--- Create RLS policies for audio_files
-CREATE POLICY "Users can read own audio files"
-  ON audio_files
-  FOR SELECT
-  TO authenticated
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can create own audio files"
-  ON audio_files
-  FOR INSERT
-  TO authenticated
-  WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update own audio files"
-  ON audio_files
-  FOR UPDATE
-  TO authenticated
-  USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete own audio files"
-  ON audio_files
-  FOR DELETE
-  TO authenticated
-  USING (auth.uid() = user_id);
-
 -- Function to automatically create profile on user signup
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS trigger AS $$
