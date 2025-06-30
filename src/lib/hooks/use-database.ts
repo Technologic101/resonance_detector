@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
-import { getDatabase } from '@/lib/supabase/database'
 import { Space, Sample } from '@/lib/types'
 import { useAuth } from '@/components/auth/auth-provider'
+import { useDatabase } from '@/components/providers/database-provider'
 
 export function useSpaces() {
-  const { user, supabase } = useAuth()
+  const { user } = useAuth()
+  const database = useDatabase()
   const [spaces, setSpaces] = useState<Space[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -20,7 +21,6 @@ export function useSpaces() {
       setLoading(true)
       setError(null)
       
-      const database = getDatabase(supabase)
       const allSpaces = await database.getAllSpaces(user)
       setSpaces(allSpaces) // Already sorted by updated_at DESC from Supabase
     } catch (err) {
@@ -29,7 +29,7 @@ export function useSpaces() {
     } finally {
       setLoading(false)
     }
-  }, [user, supabase])
+  }, [user, database])
 
   useEffect(() => {
     loadSpaces()
@@ -44,7 +44,8 @@ export function useSpaces() {
 }
 
 export function useSpace(id: string | null) {
-  const { user, supabase } = useAuth()
+  const { user } = useAuth()
+  const database = useDatabase()
   const [space, setSpace] = useState<Space | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -60,7 +61,6 @@ export function useSpace(id: string | null) {
       setLoading(true)
       setError(null)
       
-      const database = getDatabase(supabase)
       const foundSpace = await database.getSpace(user, id)
       setSpace(foundSpace || null)
     } catch (err) {
@@ -69,7 +69,7 @@ export function useSpace(id: string | null) {
     } finally {
       setLoading(false)
     }
-  }, [id, user, supabase])
+  }, [id, user, database])
 
   useEffect(() => {
     loadSpace()
@@ -84,7 +84,8 @@ export function useSpace(id: string | null) {
 }
 
 export function useSamples(spaceId?: string) {
-  const { user, supabase } = useAuth()
+  const { user } = useAuth()
+  const database = useDatabase()
   const [samples, setSamples] = useState<Sample[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -100,7 +101,6 @@ export function useSamples(spaceId?: string) {
       setLoading(true)
       setError(null)
       
-      const database = getDatabase(supabase)
       const allSamples = spaceId 
         ? await database.getSamplesForSpace(user, spaceId)
         : await database.getAllSamples(user)
@@ -111,7 +111,7 @@ export function useSamples(spaceId?: string) {
     } finally {
       setLoading(false)
     }
-  }, [spaceId, user, supabase])
+  }, [spaceId, user, database])
 
   useEffect(() => {
     loadSamples()
@@ -126,7 +126,8 @@ export function useSamples(spaceId?: string) {
 }
 
 export function useStats() {
-  const { user, supabase } = useAuth()
+  const { user } = useAuth()
+  const database = useDatabase()
   const [stats, setStats] = useState({
     spaceCount: 0,
     sampleCount: 0,
@@ -145,7 +146,6 @@ export function useStats() {
       setLoading(true)
       setError(null)
       
-      const database = getDatabase(supabase)
       const [spaceCount, sampleCount] = await Promise.all([
         database.getSpaceCount(user),
         database.getSampleCount(user),
@@ -160,7 +160,7 @@ export function useStats() {
     } finally {
       setLoading(false)
     }
-  }, [user, supabase])
+  }, [user, database])
 
   useEffect(() => {
     loadStats()
@@ -175,7 +175,8 @@ export function useStats() {
 }
 
 export function useRecentSamples(limit: number = 5) {
-  const { user, supabase } = useAuth()
+  const { user } = useAuth()
+  const database = useDatabase()
   const [samples, setSamples] = useState<Sample[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -191,7 +192,6 @@ export function useRecentSamples(limit: number = 5) {
       setLoading(true)
       setError(null)
       
-      const database = getDatabase(supabase)
       const recentSamples = await database.getRecentSamples(user, limit)
       setSamples(recentSamples)
     } catch (err) {
@@ -202,7 +202,7 @@ export function useRecentSamples(limit: number = 5) {
     } finally {
       setLoading(false)
     }
-  }, [limit, user, supabase])
+  }, [limit, user, database])
 
   useEffect(() => {
     loadRecentSamples()

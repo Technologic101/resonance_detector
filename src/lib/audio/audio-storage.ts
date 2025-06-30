@@ -1,4 +1,3 @@
-import { getDatabase } from '@/lib/supabase/database'
 import { SoundType, SignalQuality } from '@/lib/types'
 import type { User } from '@supabase/supabase-js'
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -17,7 +16,7 @@ export interface AudioFile {
 export class AudioStorage {
   static async saveAudioFile(
     user: User,
-    supabase: SupabaseClient<Database>,
+    database: any, // Use the database instance directly
     blob: Blob,
     spaceId: string,
     soundType: SoundType,
@@ -36,8 +35,6 @@ export class AudioStorage {
       })
 
       console.log('AudioStorage: User authenticated:', user.id)
-
-      const database = getDatabase(supabase)
 
       // Generate filename
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
@@ -67,7 +64,7 @@ export class AudioStorage {
       console.log('AudioStorage: Sample created with ID:', sample.id)
 
       // Upload file to Supabase Storage
-      const filePath = await this.uploadToStorage(user, supabase, blob, sample.id, filename)
+      const filePath = await this.uploadToStorage(user, database, blob, sample.id, filename)
       
       console.log('AudioStorage: File uploaded to path:', filePath)
 
@@ -85,9 +82,8 @@ export class AudioStorage {
     }
   }
 
-  static async getAudioFile(user: User, supabase: SupabaseClient<Database>, sampleId: string): Promise<Blob | null> {
+  static async getAudioFile(user: User, database: any, sampleId: string): Promise<Blob | null> {
     try {
-      const database = getDatabase(supabase)
       const sample = await database.getSample(user, sampleId)
       if (!sample || !sample.audioFilePath) return null
 
@@ -103,9 +99,8 @@ export class AudioStorage {
     }
   }
 
-  static async deleteAudioFile(user: User, supabase: SupabaseClient<Database>, sampleId: string): Promise<void> {
+  static async deleteAudioFile(user: User, database: any, sampleId: string): Promise<void> {
     try {
-      const database = getDatabase(supabase)
       const sample = await database.getSample(user, sampleId)
       if (!sample) return
 
@@ -141,7 +136,7 @@ export class AudioStorage {
     }
   }
 
-  private static async uploadToStorage(user: User, supabase: SupabaseClient<Database>, blob: File | Blob, sampleId: string, filename: string): Promise<string> {
+  private static async uploadToStorage(user: User, database: any, blob: File | Blob, sampleId: string, filename: string): Promise<string> {
     try {
       console.log('AudioStorage: Starting file upload...', { userId: user.id, sampleId, filename })
 
@@ -155,7 +150,6 @@ export class AudioStorage {
       const file = blob instanceof File ? blob : new File([blob], filename, { type: blob.type })
 
       // Upload to Supabase storage
-      const database = getDatabase(supabase)
       const uploadResult = await database.uploadAudioFile(user, file, sampleId)
       
       console.log('AudioStorage: Upload successful:', uploadResult)

@@ -4,6 +4,7 @@ import { AudioStorage } from '@/lib/audio/audio-storage'
 import { SoundType, SignalQuality } from '@/lib/types'
 import type { User } from '@supabase/supabase-js'
 import { useAuth } from '@/components/auth/auth-provider'
+import { useDatabase } from '@/components/providers/database-provider'
 
 export interface UseAudioRecorderOptions {
   config?: AudioRecorderConfig
@@ -12,7 +13,8 @@ export interface UseAudioRecorderOptions {
 }
 
 export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
-  const { user, supabase } = useAuth()
+  const { user } = useAuth()
+  const database = useDatabase()
   const [isInitialized, setIsInitialized] = useState(false)
   const [recordingState, setRecordingState] = useState<RecordingState>({
     isRecording: false,
@@ -200,7 +202,7 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
 
       const sampleId = await AudioStorage.saveAudioFile(
         user,
-        supabase,
+        database,
         blob,
         spaceId,
         soundType,
@@ -215,7 +217,7 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
       console.error('Failed to save recording:', error)
       throw error
     }
-  }, [recordingState.duration, analysis, user, supabase])
+  }, [recordingState.duration, analysis, user, database])
 
   // Get storage info
   const getStorageInfo = useCallback(async () => {
