@@ -63,19 +63,16 @@ export function ProtectedRoute({ children, fallback }: ProtectedRouteProps) {
                   href="https://bolt.new" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
+                  className="hover:opacity-80 transition-opacity"
                   title="Made with bolt.new"
                 >
                   <Image
                     src={theme === 'dark' ? '/white_circle_360x360.png' : '/black_circle_360x360.png'}
                     alt="bolt.new"
-                    width={32}
-                    height={32}
+                    width={64}
+                    height={64}
                     className="rounded-full"
                   />
-                  <span className="text-sm text-muted-foreground hidden sm:block">
-                    Made with bolt.new
-                  </span>
                 </a>
                 <Button
                   variant="outline"
