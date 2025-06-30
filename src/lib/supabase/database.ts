@@ -72,14 +72,6 @@ class SupabaseDatabase {
     console.log('Database: Creating space for user:', user.id)
     console.log('Database: Space data:', data)
 
-    // Verify we have a session before making the request
-    const { data: { session } } = await this.supabase.auth.getSession()
-    if (!session) {
-      throw new Error('No active session found')
-    }
-
-    console.log('Database: Session verified, making request...')
-
     const { data: spaceData, error } = await this.supabase
       .from('spaces')
       .insert({
