@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { database } from '@/lib/supabase/database'
 import { Space, Sample } from '@/lib/types'
-import { User } from '@supabase/supabase-js'
 
 export function useSpaces() {
   const [spaces, setSpaces] = useState<Space[]>([])
@@ -107,7 +106,7 @@ export function useSamples(spaceId?: string) {
   }
 }
 
-export function useStats(user: User | null) {
+export function useStats() {
   const [stats, setStats] = useState({
     spaceCount: 0,
     sampleCount: 0,
@@ -116,13 +115,6 @@ export function useStats(user: User | null) {
   const [error, setError] = useState<string | null>(null)
 
   const loadStats = useCallback(async () => {
-    // Don't attempt to load stats if user is not authenticated
-    if (!user) {
-      setLoading(false)
-      setStats({ spaceCount: 0, sampleCount: 0 })
-      return
-    }
-
     try {
       setLoading(true)
       setError(null)
@@ -141,7 +133,7 @@ export function useStats(user: User | null) {
     } finally {
       setLoading(false)
     }
-  }, [user])
+  }, [])
 
   useEffect(() => {
     loadStats()
@@ -155,19 +147,12 @@ export function useStats(user: User | null) {
   }
 }
 
-export function useRecentSamples(user: User | null, limit: number = 5) {
+export function useRecentSamples(limit: number = 5) {
   const [samples, setSamples] = useState<Sample[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const loadRecentSamples = useCallback(async () => {
-    // Don't attempt to load samples if user is not authenticated
-    if (!user) {
-      setLoading(false)
-      setSamples([])
-      return
-    }
-
     try {
       setLoading(true)
       setError(null)
@@ -182,7 +167,7 @@ export function useRecentSamples(user: User | null, limit: number = 5) {
     } finally {
       setLoading(false)
     }
-  }, [user, limit])
+  }, [limit])
 
   useEffect(() => {
     loadRecentSamples()

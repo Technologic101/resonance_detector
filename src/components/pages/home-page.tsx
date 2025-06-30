@@ -8,27 +8,22 @@ import { useNavigation } from '@/lib/context/navigation-context'
 import { useStats, useRecentSamples } from '@/lib/hooks/use-database'
 import { formatDateTime, getSoundTypeLabel, getSignalQualityBgColor } from '@/lib/utils/space-utils'
 import { useEffect } from 'react'
-import { useAuth } from '@/components/auth/auth-provider'
 
 export function HomePage() {
   const { navigateToRecording, navigateToCreateSpace, setCurrentPage } = useNavigation()
-  const { user } = useAuth()
-  const { stats, loading: statsLoading, error: statsError, refetch: refetchStats } = useStats(user)
-  const { samples: recentSamples, loading: samplesLoading, error: samplesError, refetch: refetchSamples } = useRecentSamples(user, 3)
+  const { stats, loading: statsLoading, error: statsError, refetch: refetchStats } = useStats()
+  const { samples: recentSamples, loading: samplesLoading, error: samplesError, refetch: refetchSamples } = useRecentSamples(3)
 
   // Ensure stats are loaded correctly on first render
   useEffect(() => {
-    // Only refetch if user is authenticated
-    if (user) {
-      // Refetch stats after a short delay to ensure database is ready
-      const timer = setTimeout(() => {
-        refetchStats()
-        refetchSamples()
-      }, 500)
-      
-      return () => clearTimeout(timer)
-    }
-  }, [user, refetchStats, refetchSamples])
+    // Refetch stats after a short delay to ensure database is ready
+    const timer = setTimeout(() => {
+      refetchStats()
+      refetchSamples()
+    }, 500)
+    
+    return () => clearTimeout(timer)
+  }, [refetchStats, refetchSamples])
 
   const handleNewRecording = () => {
     console.log('Navigating to recording page...')

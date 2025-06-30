@@ -22,16 +22,6 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: AuthModal
 
   const { signIn, signUp } = useAuth()
 
-  // Define resetForm function before useEffect hooks
-  const resetForm = () => {
-    setEmail('')
-    setPassword('')
-    setFullName('')
-    setError(null)
-    setSuccess(null)
-    setLoading(false)
-  }
-
   // Reset form when modal opens/closes or defaultMode changes
   useEffect(() => {
     if (isOpen) {
@@ -66,6 +56,15 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: AuthModal
     } finally {
       setLoading(false)
     }
+  }
+
+  const resetForm = () => {
+    setEmail('')
+    setPassword('')
+    setFullName('')
+    setError(null)
+    setSuccess(null)
+    setLoading(false)
   }
 
   const switchMode = () => {
