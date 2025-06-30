@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { X, Mail, Lock, User, AlertCircle, CheckCircle } from 'lucide-react'
 import { useAuth } from './auth-provider'
@@ -21,6 +21,19 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: AuthModal
   const [success, setSuccess] = useState<string | null>(null)
 
   const { signIn, signUp } = useAuth()
+
+  // Reset form when modal opens/closes or defaultMode changes
+  useEffect(() => {
+    if (isOpen) {
+      setMode(defaultMode)
+      resetForm()
+    }
+  }, [isOpen, defaultMode])
+
+  // Reset form when switching modes
+  useEffect(() => {
+    resetForm()
+  }, [mode])
 
   if (!isOpen) return null
 
@@ -51,11 +64,18 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: AuthModal
     setFullName('')
     setError(null)
     setSuccess(null)
+    setLoading(false)
   }
 
   const switchMode = () => {
-    setMode(mode === 'signin' ? 'signup' : 'signin')
+    const newMode = mode === 'signin' ? 'signup' : 'signin'
+    setMode(newMode)
+    // Form will be reset by the useEffect above
+  }
+
+  const handleClose = () => {
     resetForm()
+    onClose()
   }
 
   return (
@@ -69,7 +89,7 @@ export function AuthModal({ isOpen, onClose, defaultMode = 'signin' }: AuthModal
           <Button
             variant="ghost"
             size="icon"
-            onClick={onClose}
+            onClick={handleClose}
             className="hover:bg-white/10"
           >
             <X className="h-5 w-5" />
